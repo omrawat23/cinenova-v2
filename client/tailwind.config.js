@@ -1,11 +1,10 @@
 /** @type {import('tailwindcss').Config} */
-module.exports = {
-	darkMode: ["class"],
-	content: [
+export const darkMode = ["class"];
+export const content = [
 	"./index.html",
 	"./src/**/*.{vue,js,ts,jsx,tsx}" // Adjust this line based on your framework and file extensions
-],
-theme: {
+];
+export const theme = {
 	extend: {
 		screens: {
 			'xs': '380px',
@@ -85,7 +84,5 @@ theme: {
 			}
 		}
 	}
-},
-plugins: [require("tailwindcss-animate"), require('tailwind-scrollbar-hide')],
-
-}
+};
+export const plugins = [require("tailwindcss-animate"), require('tailwind-scrollbar-hide')];
