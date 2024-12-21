@@ -9,15 +9,9 @@
     }
   ],
   "compilerOptions": {
-    "noEmit": true,
-    "allowJs": true,
-    "checkJs": false,
-    "strict": false,
-    "suppressImplicitAnyIndexErrors": true,
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
     }
-  },
-  "exclude": [ "error TS2345" ]
+  }
 }
