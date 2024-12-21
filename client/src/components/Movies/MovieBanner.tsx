@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Play, MoreHorizontal } from 'lucide-react';
 import { useNavigate } from "react-router-dom";
 import axios from 'axios';
-import { type Movie } from '@/types/movie';
+import type { Movie } from 'types';
 
 export default function MovieBanner() {
   const [movies, setMovies] = useState<Movie[]>([]);

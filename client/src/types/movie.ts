@@ -5,6 +5,7 @@ export interface Movie {
     id: number;
     name: string;
   }[];
+  genre_ids: [];
   id: number;
   imdb_id: string;
   overview: string;
