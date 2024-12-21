@@ -31,16 +31,13 @@ export interface ImageData {
 export interface Movie {
   adult: boolean;
   backdrop_path: string;
-  genres: {
-    id: number;
-    name: string;
-  }[];
+  genre_ids: [];
   id: number;
   imdb_id: string;
   overview: string;
   poster_path: string;
   release_date: string;
-  runtime: number | null;
+  runtime: number | undefined;
   tagline: string;
   title: string;
   vote_average: number;

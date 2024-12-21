@@ -1,5 +1,5 @@
 import { Card } from "@/components/ui/card";
-import { Play,Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import { type Movie } from "@/types/movie";
 import { Link } from "react-router-dom";
 
@@ -9,7 +9,7 @@ interface CardProps {
   onNavigate: (movieId: number) => void;
 }
 
-const WatchListCard: React.FC<CardProps> = ({ movie, onRemove, onNavigate }) => {
+const WatchListCard: React.FC<CardProps> = ({ movie, onRemove }) => {
   return (
     <div>
     <Card key={movie.id} className="overflow-hidden group relative border-none">

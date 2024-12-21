@@ -1,44 +1,59 @@
-import { useCallback } from 'react';
+import { useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import { Check, Plus } from 'lucide-react';
-import axios from 'axios';
+import { Check, Plus } from "lucide-react";
+import axios from "axios";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
+import type { Movie } from "types";
 
-export default function PlusWatchlistButton({ currentMovie, watchlist, setWatchlist }) {
-  const { user } = useAuth();
+interface User {
+  uuid: string;
+}
 
-  const handleAddToWatchlist = useCallback(async (movie) => {
-    try {
-      if (!user?.uuid) {
-        toast.error('Please log in to add to watchlist');
-        return;
-      }
+interface PlusWatchlistButtonProps {
+  currentMovie: Movie;
+  watchlist: number[]; // Array of movie IDs
+  setWatchlist: React.Dispatch<React.SetStateAction<number[]>>; // Setter for watchlist
+}
 
-      await axios.post(
-        'http://localhost:3003/api/users/watchlist',
-        {
+export default function PlusWatchlistButton({
+  currentMovie,
+  watchlist,
+  setWatchlist,
+}: PlusWatchlistButtonProps) {
+  const { user } = useAuth() as { user: User | null }; // Assuming user can be null if unauthenticated
+
+  const handleAddToWatchlist = useCallback(
+    async (movie: Movie) => {
+      try {
+        if (!user?.uuid) {
+          toast.error("Please log in to add to watchlist");
+          return;
+        }
+
+        await axios.post("http://localhost:3003/api/users/watchlist", {
           uuid: user.uuid,
           movie: {
             id: movie.id,
             title: movie.title,
             release_date: movie.release_date,
             poster_path: movie.poster_path,
-            media_type: 'movie'
-          }
-        }
-      );
+            media_type: "movie",
+          },
+        });
 
-      toast.success('Added to Watchlist');
-      setWatchlist((prev) => [...prev, movie.id]);
-    } catch (error) {
-      if (axios.isAxiosError(error) && error.response?.status === 400) {
-        toast.error('Movie is already in your watchlist');
-      } else {
-        toast.error('Failed to add movie to watchlist');
+        toast.success("Added to Watchlist");
+        setWatchlist((prev) => [...prev, movie.id]);
+      } catch (error) {
+        if (axios.isAxiosError(error) && error.response?.status === 400) {
+          toast.error("Movie is already in your watchlist");
+        } else {
+          toast.error("Failed to add movie to watchlist");
+        }
       }
-    }
-  }, [user, setWatchlist]);
+    },
+    [user, setWatchlist]
+  );
 
   return (
     <Button
@@ -52,7 +67,7 @@ export default function PlusWatchlistButton({ currentMovie, watchlist, setWatchl
       ) : (
         <Plus className="mr-2 h-4 w-4" />
       )}
-      {watchlist.includes(currentMovie.id) ? 'Added' : 'Watchlist'}
+      {watchlist.includes(currentMovie.id) ? "Added" : "Watchlist"}
     </Button>
   );
 }
