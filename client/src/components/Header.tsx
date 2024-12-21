@@ -19,7 +19,7 @@ export const Header: React.FC = () => {
     navigate(`/watchlist`);
   };
 
-  const handleChange = (value) => {
+  const handleChange = (value : unknown) => {
     // Define URLs for each option
     const urlMap = {
       all: '/',

@@ -5,7 +5,7 @@ import MoviesHomePage from "./components/Movies/MoviesHomePage";
 import { AuthProvider } from '@/contexts/AuthContext';
 import { Toaster } from 'sonner';
 import WatchList from './components/WatchList';
-import Example from './components/example-usage';
+
 import MovieVideoPage from './components/Movies/MovieVideoPage';
 import WatchHistory from './components/History';
 import TvHomePage from './components/Tv/TvHomePage';
@@ -26,7 +26,7 @@ const AppRouter = () => {
             <Route path="/watchlist" element={<WatchList />} />
             <Route path="/history" element={<WatchHistory />} />
 
-            <Route path="/example" element={<Example />} />
+
           </Routes>
         </Layout>
         {/* Include the Toaster component */}

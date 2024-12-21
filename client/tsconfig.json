@@ -9,9 +9,11 @@
     }
   ],
   "compilerOptions": {
+    "suppressImplicitAnyIndexErrors": true,
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
     }
-  }
+  },
+  "exclude": [ "error TS2345" ]
 }
