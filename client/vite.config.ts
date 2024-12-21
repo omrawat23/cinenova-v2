@@ -13,4 +13,9 @@ export default defineConfig({
     target: "esnext",
     sourcemap: false,
   },
+  esbuild: {
+    logOverride: {
+      'ts-resolver-error': 'silent'
+    }
+  }
 });
