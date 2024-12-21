@@ -19,16 +19,18 @@ export const Header: React.FC = () => {
     navigate(`/watchlist`);
   };
 
-  const handleChange = (value : unknown) => {
-    // Define URLs for each option
-    const urlMap = {
+  const handleChange = (value: string) => {
+    // Define URLs for each option with proper typing
+    const urlMap: Record<string, string> = {
       all: '/',
       movies: '/movies',
       tv: '/tv-series',
     };
 
-    // Navigate to the selected URL
-    navigate(urlMap[value]);
+    // Check if the value exists in the map
+    if (value in urlMap) {
+      navigate(urlMap[value]);
+    }
   };
 
   return (
