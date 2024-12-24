@@ -15,7 +15,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
     <div className="flex h-screen bg-neoDark text-white overflow-hidden">
     {/* Sidebar */}
-    <div className="hidden flex-shrink-0 md:flex flex-col w-64 my-8 ml-8 mr-4 rounded-2xl shadow-2xl relative overflow-hidden bg-[#1E1E1E]">
+    <div className="hidden flex-shrink-0 md:flex flex-col w-44 lg:w-64 my-8 ml-8 mr-4 rounded-2xl shadow-2xl relative overflow-hidden bg-[#1E1E1E]">
       {/* Gradient overlay */}
       <div
         className="absolute top-0 left-0 w-full h-full opacity-90 pointer-events-none"
@@ -25,9 +25,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       <div className="relative z-10 px-6 pt-6 flex items-center justify-between">
         <div className="flex items-center space-x-2">
           <h1 className="text-3xl font-bold text-white tracking-tight">Cinenova</h1>
-          <div className="bg-blue-600 text-white text-xs px-2 py-0.5 rounded-full font-semibold">
+          {/* <div className="bg-blue-600 text-white text-xs px-2 py-0.5 rounded-full font-semibold ">
             Pro
-          </div>
+          </div> */}
         </div>
       </div>
 

@@ -1,10 +1,12 @@
 import { useEffect, useState, useCallback } from "react";
 import axios from "axios";
-import { useParams } from "react-router-dom";
-import useEmblaCarousel from "embla-carousel-react";
-import type { EmblaCarouselType, EmblaOptionsType } from "embla-carousel";
-import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel"
 import MovieBanner from "./Movies/MovieBanner";
 import MovieCard from "./Card";
 import type { Movie, TvShow } from "types";
@@ -14,27 +16,7 @@ export default function HomePage() {
   const [topRatedMovies, setTopRatedMovies] = useState<Movie[]>([]);
   const [popularTVShows, setPopularTVShows] = useState<TvShow[]>([]);
   const [loading, setLoading] = useState(true);
-  const { page } = useParams();
 
-  const options: EmblaOptionsType = {
-    loop: true,
-    align: "start",
-    slidesToScroll: 1,
-  };
-
-  // Carousels for different sections
-  const [popularMoviesEmblaRef, popularMoviesEmblaApi] = useEmblaCarousel(options);
-  const [topRatedMoviesEmblaRef, topRatedMoviesEmblaApi] = useEmblaCarousel(options);
-  const [popularTVShowsEmblaRef, popularTVShowsEmblaApi] = useEmblaCarousel(options);
-
-  // Scroll functions for each carousel
-  const scrollPrev = useCallback((emblaApi: EmblaCarouselType | undefined) => {
-    emblaApi?.scrollPrev();
-  }, []);
-
-  const scrollNext = useCallback((emblaApi: EmblaCarouselType | undefined) => {
-    emblaApi?.scrollNext();
-  }, []);
 
   // Fetch function for different types of content
   const fetchContent = useCallback(
@@ -72,11 +54,11 @@ export default function HomePage() {
 
   // Fetch content on component mount
   useEffect(() => {
-    const currentPage = parseInt(page || "1", 10);
+    const currentPage = 1;
     fetchContent("movie", "popular", currentPage);
     fetchContent("movie", "top_rated", currentPage);
     fetchContent("tv", "top_rated", currentPage);
-  }, [page, fetchContent]);
+  }, [fetchContent]);
 
   if (loading) {
     return <div className="flex justify-center items-center h-screen">Loading...</div>;
@@ -86,89 +68,53 @@ export default function HomePage() {
   const renderCarousel = (
     title: string,
     items: Movie[] | TvShow[],
-    emblaRef: (node: HTMLDivElement | null) => void,
-    emblaApi: EmblaCarouselType | undefined,
     type: "movie" | "tv"
   ) => (
     <div className="max-w-8xl mt-4 mx-auto">
-      <div className="flex items-center justify-between mb-4 ml-2">
-        <h2 className="text-2xl font-bold text-white">{title}</h2>
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="icon"
-            className="md:flex bg-white/10 backdrop-blur-md hover:bg-white/20 border-0 rounded-full w-10 h-10"
-            onClick={() => scrollPrev(emblaApi)}
-          >
-            <ChevronLeft className="h-5 w-5 text-white" />
-          </Button>
-          <Button
-            variant="outline"
-            size="icon"
-            className="md:flex bg-white/10 backdrop-blur-md hover:bg-white/20 border-0 rounded-full w-10 h-10"
-            onClick={() => scrollNext(emblaApi)}
-          >
-            <ChevronRight className="h-5 w-5 text-white" />
-          </Button>
-        </div>
-      </div>
-      <div className="relative">
-        <div className="overflow-hidden" ref={emblaRef}>
-          <div className="flex pl-4">
-            {items.map((item) => (
-              <div
-                key={item.id}
-                className="flex-[0_0_50%] sm:flex-[0_0_50%] md:flex-[0_0_33.33%] lg:flex-[0_0_20%] xl:flex-[0_0_14.5%] px-2 mb-4"
-              >
-                <MovieCard
-                  id={item.id}
-                  type={type}
-                  title={type === "movie" ? (item as Movie).title : (item as TvShow).name}
-                  posterPath={item.poster_path}
-                  voteAverage={item.vote_average}
-                  releaseDate={
-                    type === "movie"
-                      ? (item as Movie).release_date
-                      : (item as TvShow).first_air_date
-                  }
-                  genreIds={item.genre_ids}
-                />
-              </div>
-            ))}
+      <Carousel
+         opts={{
+          align: "start",
+          loop: true,
+        }}
+        className="w-full"
+      >
+         <div className="flex items-center justify-between mb-4">
+          <h2 className="text-2xl md:text-2xl font-bold text-white">{title}</h2>
+          <div className="flex gap-2 relative">
+            <CarouselPrevious className=" static translate-y-0 h-8 w-8 bg-white/10 hover:bg-white/20 border-0" />
+            <CarouselNext className=" static translate-y-0 h-8 w-8 bg-white/10 hover:bg-white/20 border-0" />
           </div>
         </div>
-      </div>
+        <CarouselContent className="-ml-2 md:-ml-4">
+          {items.map((item) => (
+            <CarouselItem key={item.id} className="pl-2 md:pl-4 flex-[0_0_50%] sm:flex-[0_0_50%] md:flex-[0_0_33.33%] lg:flex-[0_0_20%] xl:flex-[0_0_14.5%]">
+              <MovieCard
+                type={type}
+                id={item.id}
+                title={type === "movie" ? (item as Movie).title : (item as TvShow).name}
+                posterPath={item.poster_path}
+                voteAverage={item.vote_average}
+                releaseDate={
+                  type === "movie"
+                    ? (item as Movie).release_date
+                    : (item as TvShow).first_air_date
+                }
+                genreIds={item.genre_ids}
+              />
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+      </Carousel>
     </div>
   );
 
   return (
     <div className="space-y-4">
       <MovieBanner />
-      <div className="w-full space-y-10">
-        {renderCarousel(
-          "Popular Movies",
-          popularMovies,
-          popularMoviesEmblaRef,
-          popularMoviesEmblaApi,
-          "movie"
-        )}
-
-        {renderCarousel(
-          "Top Rated Movies",
-          topRatedMovies,
-          topRatedMoviesEmblaRef,
-          topRatedMoviesEmblaApi,
-          "movie"
-        )}
-
-        {renderCarousel(
-          "Top Rated TV Shows",
-          popularTVShows,
-          popularTVShowsEmblaRef,
-          popularTVShowsEmblaApi,
-          "tv"
-        )}
-
+      <div className="w-full space-y-8">
+        {renderCarousel("Popular Movies", popularMovies, "movie")}
+        {renderCarousel("Top Rated Movies", topRatedMovies, "movie")}
+        {renderCarousel("Top Rated TV Shows", popularTVShows, "tv")}
         <p className="hidden sm:flex justify-center items-center mt-6 mb-6 text-gray-600">
           This site does not store any files on the server; we only link to the media hosted on
           3rd party services.
@@ -177,3 +123,4 @@ export default function HomePage() {
     </div>
   );
 }
+

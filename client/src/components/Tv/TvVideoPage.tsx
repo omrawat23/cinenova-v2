@@ -1,10 +1,12 @@
-
 import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { Play, User2, ImageIcon, ChevronDown } from 'lucide-react'
+import { Play, User2, ImageIcon, ChevronDown, Plus, Check } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import type { Episode,TvShow,CastMember,SimilarShow,ImageData } from 'types'
+import { useAuth } from "@/contexts/AuthContext"
+import { toast } from "sonner"
+import axios from 'axios'
 
 export default function TvVideoPage() {
   const { movieId } = useParams<{ movieId: string }>()
@@ -26,6 +28,8 @@ export default function TvVideoPage() {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const videoRef = useRef<HTMLDivElement>(null)
   const apiKey = import.meta.env.VITE_TMDB_API_KEY
+  const { user } = useAuth()
+  const [watchlist, setWatchlist] = useState<number[]>([])
 
   useEffect(() => {
     const fetchTvData = async () => {
@@ -126,6 +130,7 @@ export default function TvVideoPage() {
     window.scrollTo(0, 0)
   }
 
+
   const handleIframeLoad = () => {
     const iframe = iframeRef.current;
     if (iframe) {
@@ -163,21 +168,43 @@ export default function TvVideoPage() {
     }
   };
 
-  // const handleEpisodeChange = () => {
-  //   if (showVideo) {
-  //     setShowVideo(false)
-  //     setTimeout(() => setShowVideo(true), 100)
-  //   }
-  // }
+  const handleAddToWatchlist = async (tvShow: TvShow) => {
+    try {
+      if (!user?.uuid) {
+        toast.error('Please log in to add to watchlist')
+        return
+      }
+
+      if (!tvShow) return
+
+      await axios.post(
+        'http://localhost:3003/api/users/watchlist',
+        {
+          uuid: user.uuid,
+          movie: {
+            id: tvShow.id,
+            title: tvShow.name,
+            release_date: tvShow.first_air_date,
+            poster_path: tvShow.poster_path,
+            media_type: 'tv'
+          }
+        }
+      )
+
+      toast.success('Added to Watchlist')
+      setWatchlist(prev => [...prev, tvShow.id])
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response?.status === 400) {
+        toast.error('Show is already in your watchlist')
+      } else {
+        toast.error('Failed to add show to watchlist')
+      }
+    }
+  }
 
   const handleLoadMore = () => {
     setDisplayedEpisodes(prev => prev + 25)
   }
-
-  // const handleEpisodeSelect = (episodeNumber: string) => {
-  //   setSelectedEpisode(Number(episodeNumber));
-  //   setShowVideo(true);
-  // }
 
   if (loading) return (
     <div className="flex justify-center items-center min-h-screen bg-gray-900">
@@ -235,6 +262,29 @@ export default function TvVideoPage() {
           </div>
 
           <p className="text-gray-300 max-w-2xl mb-8 text-sm sm:text-base">{tvShow.overview}</p>
+          <div className='flex items-center gap-3 pt-2 mt-[-20px] mb-10'>
+          <Button
+                  onClick={() => setShowVideo(true)}
+                  size="sm"
+                  className="h-10 px-6 rounded-full bg-pink-500 hover:bg-white/90 text-black font-semibold transition-all duration-300"
+                >
+                  <Play className="mr-2 h-4 w-4 fill-black" />
+                  Watch Now
+                </Button>
+          <Button
+                  onClick={() => handleAddToWatchlist(tvShow)}
+                  variant="outline"
+                  size="sm"
+                  className="h-10 px-6 rounded-full border-white/20 bg-white/10 hover:bg-white/20 text-white font-semibold transition-all duration-300"
+                >
+                  {watchlist.includes(tvShow.id) ? (
+                    <Check className="mr-2 h-4 w-4" />
+                  ) : (
+                    <Plus className="mr-2 h-4 w-4" />
+                  )}
+                  {watchlist.includes(tvShow.id) ? 'Added' : 'Watchlist'}
+                </Button>
+          </div>
 
           {/* Mobile Season & Episode Select */}
           <div className="block md:hidden space-y-3 mb-6">

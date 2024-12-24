@@ -10,6 +10,7 @@ import MovieVideoPage from './components/Movies/MovieVideoPage';
 import WatchHistory from './components/History';
 import TvHomePage from './components/Tv/TvHomePage';
 import TvVideoPage from './components/Tv/TvVideoPage';
+import Anime from './components/Anime';
 
 const AppRouter = () => {
   return (
@@ -25,6 +26,9 @@ const AppRouter = () => {
             <Route path="/tv-videopage/:movieId" element={<TvVideoPage />} />
             <Route path="/watchlist" element={<WatchList />} />
             <Route path="/history" element={<WatchHistory />} />
+
+            <Route path="/anime" element={<Anime />} />
+
 
 
           </Routes>

@@ -64,7 +64,7 @@ export const NavigationLinks = () => {
         <span className="font-medium">TV Series</span>
       </Link>
 
-      <Link to="/coming-soon" className="flex items-center space-x-3 p-4 text-gray-300 hover:text-blue-400 hover:bg-blue-500/10 rounded-xl transition-all duration-200">
+      <Link to="/anime" className="flex items-center space-x-3 p-4 text-gray-300 hover:text-blue-400 hover:bg-blue-500/10 rounded-xl transition-all duration-200">
         <Tv className="w-5 h-5" />
         <span className="font-medium">Anime</span>
       </Link>
