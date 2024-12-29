@@ -142,7 +142,7 @@ router.delete('/watchlist/:uuid/:movieId', async (req, res) => {
 });
 
 // Route to add a movie/TV series to the user's continue_watching list
-router.post('/api/continue-watching', async (req, res) => {
+router.post('/continue-watching', async (req, res) => {
   try {
     const { uuid, movie } = req.body;
 
@@ -176,7 +176,7 @@ router.post('/api/continue-watching', async (req, res) => {
 });
 
 // Backend Route for fetching continue watching list
-router.get('/api/continue-watching/:uuid', async (req, res) => {
+router.get('/continue-watching/:uuid', async (req, res) => {
   try {
     const { uuid } = req.params;
 
