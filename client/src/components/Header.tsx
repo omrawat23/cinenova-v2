@@ -1,13 +1,21 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
+import { Search } from 'lucide-react';
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 import { useAuth } from "@/contexts/AuthContext";
-import { LoginDialog } from "@/components/login";
+import { LoginDialog } from "@/components/LoginButton";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { useNavigate } from "react-router-dom";
 import SearchComponent from "./SearchComponent";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import image from '../assets/qr.jpg'
 
 export const Header: React.FC = () => {
   const [isSearchActive, setIsSearchActive] = useState(false);
@@ -20,14 +28,12 @@ export const Header: React.FC = () => {
   };
 
   const handleChange = (value: string) => {
-    // Define URLs for each option with proper typing
     const urlMap: Record<string, string> = {
       all: '/',
       movies: '/movies',
       tv: '/tv-series',
     };
 
-    // Check if the value exists in the map
     if (value in urlMap) {
       navigate(urlMap[value]);
     }
@@ -62,17 +68,17 @@ export const Header: React.FC = () => {
         </div>
       </div>
 
-      {/* Login or User Dropdown */}
-      <div className="flex items-center space-x-4">
+      {/* Login or User Dropdown and Support Button */}
+      <div className="flex items-center space-x-4 sm:mr-4">
         {!user ? (
-          <Button onClick={() => setLoginOpen(true)}>Login</Button>
+          <Button variant="outline" onClick={() => setLoginOpen(true)}>Login</Button>
         ) : (
           <DropdownMenu>
             <DropdownMenuTrigger>
               <Button variant="ghost" className="flex items-center space-x-2">
                 <img
                   src={user.imageUrl}
-                  alt="Profile"
+                  
                   className="w-8 h-8 rounded-full object-cover"
                 />
                 <span className="hidden md:inline">{user.username}</span>
@@ -104,6 +110,42 @@ export const Header: React.FC = () => {
             </DropdownMenuContent>
           </DropdownMenu>
         )}
+
+        {/* Support Button and Dialog */}
+        <div className="hidden sm:flex">
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button variant="outline">Support 💗</Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[425px] bg-[#1a1b1e] border-gray-800">
+            <DialogHeader className="relative">
+              <DialogTitle className="text-center text-xl font-semibold text-white">Donate Money</DialogTitle>
+            </DialogHeader>
+            <div className="flex flex-col items-center space-y-4 px-4 pb-6">
+              <p className="text-center text-gray-200">
+                Support us by donating money to the following UPI address:
+              </p>
+              <div className="bg-[#2a2b2e] w-full p-3 rounded text-center">
+              <code className="text-purple-400 text-sm break-all">
+              <a
+                href="https://buymeacoffee.com/omrawat23"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline hover:text-purple-300"
+              >
+                https://buymeacoffee.com/omrawat23
+              </a>
+            </code>
+              </div>
+              <img
+                src={image}
+                alt="Bitcoin QR Code"
+                className="w-48 h-48"
+              />
+            </div>
+          </DialogContent>
+        </Dialog>
+        </div>
       </div>
 
       {/* Search Component */}
@@ -119,3 +161,4 @@ export const Header: React.FC = () => {
 };
 
 export default Header;
+

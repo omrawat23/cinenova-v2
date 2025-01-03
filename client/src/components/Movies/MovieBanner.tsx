@@ -1,42 +1,18 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
-import PlusWatchlistButton from '../WatchListButton';
+import { useState, useEffect, useMemo } from "react";
+import PlusWatchlistButton from "../PlusWatchlistButton";
 import { Button } from "@/components/ui/button";
-import { Play, MoreHorizontal } from 'lucide-react';
+import { Play, MoreHorizontal } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import axios from 'axios';
-import type { Movie } from 'types';
+import type { Movie } from "types";
 
-export default function MovieBanner() {
-  const [movies, setMovies] = useState<Movie[]>([]);
+type MovieBannerProps = {
+  movies: Movie[];
+};
+
+export default function MovieBanner({ movies }: MovieBannerProps) {
   const [currentMovieIndex, setCurrentMovieIndex] = useState(0);
   const [watchlist, setWatchlist] = useState<number[]>([]);
   const navigate = useNavigate();
-
-  const fetchMovies = useCallback(async () => {
-    const apiKey = import.meta.env.VITE_TMDB_API_KEY;
-
-    try {
-      const options = {
-        headers: {
-          accept: "application/json",
-          Authorization: `Bearer ${apiKey}`,
-        },
-      };
-
-      const { data } = await axios.get<{ results: Movie[] }>(
-        'https://api.themoviedb.org/3/movie/popular?language=en-US&page=2',
-        options
-      );
-
-      setMovies(data.results);
-    } catch (error) {
-      console.error("Error fetching movies:", error);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchMovies();
-  }, [fetchMovies]);
 
   const currentMovie = useMemo(
     () => movies[currentMovieIndex],
@@ -53,9 +29,9 @@ export default function MovieBanner() {
     return () => clearInterval(interval); // Cleanup
   }, [movies.length]);
 
-  const handleMovieClick = useCallback((movieId: number) => {
-    navigate(`/movie/${movieId}`);
-  }, [navigate]);
+  const handleMovieClick = (movieId: number) => {
+    navigate(`/videopage/${movieId}`);
+  };
 
   if (movies.length === 0) {
     return (
@@ -66,10 +42,10 @@ export default function MovieBanner() {
   }
 
   return (
-    <div className="relative w-full h-[300px] sm:h-[400px] md:h-[500px] overflow-hidden rounded-2xl sm:rounded-3xl">
+    <div className="relative w-full h-[300px] sm:h-[400px] md:h-[415px] lg:h-[480px] xl:h-[500px] overflow-hidden rounded-2xl sm:rounded-3xl">
       <div className="absolute inset-0 transition-opacity duration-1000 ease-in-out">
         <img
-          src={`https://image.tmdb.org/t/p/original${currentMovie.poster_path}`}
+          src={`https://image.tmdb.org/t/p/original${currentMovie.backdrop_path}`}
           alt={currentMovie.title}
           className="absolute inset-0 w-full h-full object-cover"
           loading="lazy"

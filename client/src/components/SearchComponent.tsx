@@ -1,7 +1,7 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Input } from '@/components/ui/input';
-import { Search } from 'lucide-react';
+import { Search, Film, Tv } from 'lucide-react';
 import axios from 'axios';
 import debounce from 'lodash/debounce';
 import { Movie, SearchResponse } from 'types';
@@ -14,6 +14,7 @@ interface SearchComponentProps {
 const SearchComponent: React.FC<SearchComponentProps> = ({ onClose, isActive }) => {
   const [searchResults, setSearchResults] = useState<Movie[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [mediaFilter, setMediaFilter] = useState<'all' | 'movie' | 'tv'>('all');
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   const searchMovies = async (query: string) => {
@@ -40,7 +41,7 @@ const SearchComponent: React.FC<SearchComponentProps> = ({ onClose, isActive }) 
         }
       );
 
-      const filteredResults = response.data.results.filter((movie) => {
+      let filteredResults = response.data.results.filter((movie) => {
         if (movie.media_type === 'tv') {
           return movie.name.toLowerCase().includes(query.toLowerCase()) || movie.first_air_date;
         } else if (movie.media_type === 'movie') {
@@ -49,6 +50,10 @@ const SearchComponent: React.FC<SearchComponentProps> = ({ onClose, isActive }) 
         return false;
       });
 
+      if (mediaFilter !== 'all') {
+        filteredResults = filteredResults.filter(item => item.media_type === mediaFilter);
+      }
+
       setSearchResults(filteredResults);
     } catch (error) {
       console.error('Error searching movies:', error);
@@ -56,10 +61,9 @@ const SearchComponent: React.FC<SearchComponentProps> = ({ onClose, isActive }) 
     }
   };
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const debouncedSearch = useCallback(
     debounce((query: string) => searchMovies(query), 250),
-    []
+    [mediaFilter]
   );
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -76,6 +80,23 @@ const SearchComponent: React.FC<SearchComponentProps> = ({ onClose, isActive }) 
     }
   };
 
+  const FilterButton = ({ type, icon: Icon, label }: { type: 'all' | 'movie' | 'tv', icon?: any, label: string }) => (
+    <button
+      onClick={() => {
+        setMediaFilter(type);
+        if (searchTerm) searchMovies(searchTerm);
+      }}
+      className={`px-3 py-1.5 rounded-lg flex items-center gap-2 transition-all ${
+        mediaFilter === type
+          ? 'bg-blue-500 text-white'
+          : 'bg-gray-700/50 text-gray-400 hover:bg-gray-700'
+      }`}
+    >
+      {Icon && <Icon className="w-4 h-4" />}
+      {label}
+    </button>
+  );
+
   if (!isActive) return null;
 
   return (
@@ -85,7 +106,7 @@ const SearchComponent: React.FC<SearchComponentProps> = ({ onClose, isActive }) 
         onClick={onClose}
       />
       <div className="relative bg-[#1C1E26]/95 backdrop-blur-xl border border-gray-800/50 rounded-xl shadow-lg shadow-black/20 w-full max-w-[500px] mx-auto">
-        <div className="p-4">
+        <div className="p-4 space-y-3">
           <div className="relative w-full">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
             <Input
@@ -97,6 +118,12 @@ const SearchComponent: React.FC<SearchComponentProps> = ({ onClose, isActive }) 
               onChange={handleSearchChange}
               className="w-full bg-gray-700/50 border-gray-600 focus:border-blue-500 text-white placeholder-gray-400 pl-10"
             />
+          </div>
+
+          <div className="flex gap-2">
+            <FilterButton type="all" label="All" />
+            <FilterButton type="movie" icon={Film} label="Movies" />
+            <FilterButton type="tv" icon={Tv} label="TV Shows" />
           </div>
         </div>
 

@@ -1,6 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { Trash2 } from "lucide-react";
-import { type Movie } from "@/types/movie";
+import { type Movie } from "types";
 import { Link } from "react-router-dom";
 
 interface CardProps {

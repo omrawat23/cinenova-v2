@@ -39,13 +39,16 @@ export function LoginDialog({
 
       // Close the dialog
       onOpenChange(false);
+
+      // Reload the page to reflect authentication state
+      window.location.reload();
     } catch (err) {
       console.error("Google Sign-In Error:", err);
-      // Optionally add error handling toast or notification
     } finally {
       setIsLoading(false);
     }
   };
+
 
 
   return (

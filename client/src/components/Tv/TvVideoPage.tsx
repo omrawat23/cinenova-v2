@@ -1,113 +1,27 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { Play, User2, ImageIcon, ChevronDown, Plus, Check } from 'lucide-react'
+import { Play, User2, ImageIcon, ChevronDown} from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import type { Episode,TvShow,CastMember,SimilarShow,ImageData } from 'types'
-import { useAuth } from "@/contexts/AuthContext"
-import { toast } from "sonner"
-import axios from 'axios'
+import type { Episode, TvShow, CastMember, ImageData, Season } from 'types'
+import { useTvShowData, useEpisodes } from '@/hooks/useTvShowData'
+import PlusWatchlistButton from '../PlusWatchlistButton'
 
 export default function TvVideoPage() {
   const { movieId } = useParams<{ movieId: string }>()
   const navigate = useNavigate()
-  const [tvShow, setTvShow] = useState<TvShow | null>(null)
-  const [cast, setCast] = useState<CastMember[]>([])
-  const [similar, setSimilar] = useState<SimilarShow[]>([])
-  const [images, setImages] = useState<ImageData>({ backdrops: [], posters: [] })
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
   const [showVideo, setShowVideo] = useState(false)
   const [selectedImage, setSelectedImage] = useState<string | null>(null)
   const [selectedSeason, setSelectedSeason] = useState<number>(1)
   const [selectedEpisode, setSelectedEpisode] = useState<number>(1)
-  const [episodes, setEpisodes] = useState<Episode[]>([])
   const [displayedEpisodes, setDisplayedEpisodes] = useState<number>(25)
   const [showSeasonSelect, setShowSeasonSelect] = useState(false)
   const [showEpisodeSelect, setShowEpisodeSelect] = useState(false)
-  const iframeRef = useRef<HTMLIFrameElement>(null);
   const videoRef = useRef<HTMLDivElement>(null)
-  const apiKey = import.meta.env.VITE_TMDB_API_KEY
-  const { user } = useAuth()
   const [watchlist, setWatchlist] = useState<number[]>([])
 
-  useEffect(() => {
-    const fetchTvData = async () => {
-      try {
-        const options = {
-          method: 'GET',
-          headers: {
-            accept: 'application/json',
-            Authorization: `Bearer ${apiKey}`,
-          },
-        }
-
-        const [tvRes, castRes, similarRes, imagesRes] = await Promise.all([
-          fetch(`https://api.themoviedb.org/3/tv/${movieId}?language=en-US`, options).then(res => res.json()),
-          fetch(`https://api.themoviedb.org/3/tv/${movieId}/credits?language=en-US`, options).then(res => res.json()),
-          fetch(`https://api.themoviedb.org/3/tv/${movieId}/similar?language=en-US`, options).then(res => res.json()),
-          fetch(`https://api.themoviedb.org/3/tv/${movieId}/images`, options).then(res => res.json())
-        ])
-
-        setTvShow(tvRes)
-        setCast(castRes.cast.slice(0, 7))
-        setSimilar(similarRes.results.slice(0, 6))
-        setImages({
-          backdrops: imagesRes.backdrops.slice(0, 8),
-          posters: imagesRes.posters.slice(0, 4)
-        })
-        setLoading(false)
-      } catch (err) {
-        console.error(err)
-        setError('Failed to fetch TV show data')
-        setLoading(false)
-      }
-    }
-
-    fetchTvData()
-    setShowVideo(false)
-    setSelectedImage(null)
-  }, [apiKey, movieId])
-
-  useEffect(() => {
-    const fetchEpisodes = async () => {
-      if (!tvShow) return
-      try {
-        const options = {
-          method: 'GET',
-          headers: {
-            accept: 'application/json',
-            Authorization: `Bearer ${apiKey}`,
-          },
-        }
-        const res = await fetch(`https://api.themoviedb.org/3/tv/${movieId}/season/${selectedSeason}?language=en-US`, options)
-        const data = await res.json()
-        setEpisodes(data.episodes)
-      } catch (err) {
-        console.error(err)
-        setError('Failed to fetch episodes')
-      }
-    }
-
-    fetchEpisodes()
-  }, [movieId, selectedSeason, tvShow, showVideo, apiKey])
-
-  useEffect(() => {
-    const handleMediaDataMessage = (event: MessageEvent) => {
-      if (event.origin !== 'https://vidlink.pro') return;
-
-      if (event.data?.type === 'MEDIA_DATA') {
-        const mediaData = event.data.data;
-        localStorage.setItem('vidLinkProgress', JSON.stringify(mediaData));
-      }
-    };
-
-    window.addEventListener('message', handleMediaDataMessage);
-
-    return () => {
-      window.removeEventListener('message', handleMediaDataMessage);
-    };
-  }, []);
+  const { data: tvShowData, isLoading, error } = useTvShowData(movieId || '')
+  const { data: episodes = [] } = useEpisodes(movieId || '', selectedSeason)
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -125,88 +39,43 @@ export default function TvVideoPage() {
     }
   }, [showVideo])
 
+  useEffect(() => {
+    const handleMediaDataMessage = (event: MessageEvent) => {
+      if (event.origin !== 'https://vidlink.pro') return;
+
+      if (event.data?.type === 'MEDIA_DATA') {
+        const mediaData = event.data.data;
+        localStorage.setItem('vidLinkProgress', JSON.stringify(mediaData));
+      }
+    };
+
+    const handleClick = (event: MouseEvent) => {
+      const iframe = document.querySelector('iframe');
+      if (iframe && iframe.contains(event.target as Node)) {
+        event.preventDefault();
+        event.stopPropagation();
+        alert('Pop-ups are blocked!');
+      }
+    };
+
+    window.addEventListener('message', handleMediaDataMessage);
+    window.addEventListener('click', handleClick);
+
+    return () => {
+      window.removeEventListener('message', handleMediaDataMessage);
+      window.removeEventListener('click', handleClick);
+    };
+  }, []);
+
   const handleSimilarMovieClick = (similarMovieId: number) => {
     navigate(`/tv-videopage/${similarMovieId}`)
-    window.scrollTo(0, 0)
-  }
-
-
-  const handleIframeLoad = () => {
-    const iframe = iframeRef.current;
-    if (iframe) {
-      try {
-        const iframeDocument = iframe.contentDocument || iframe.contentWindow?.document;
-        if (iframeDocument) {
-          const blockedUrls = [
-            'https://track.torarymor.world/',
-            'https://mordeegnoup.com/',
-            'https://promo.worldofwarships.asia/',
-            'http://instagram.bukusukses.com/',
-            'https://chounimakso.com/',
-            'https://www.klook.com/',
-            'https://join.worldoftanks.asia/',
-            'https://tauvoubuzigloa.com/',
-            'https://intellipopup.com/',
-            'https://win.in-pari-match.com/',
-          ];
-
-          const links = iframeDocument.querySelectorAll('a');
-          links.forEach((link: HTMLAnchorElement) => {
-            link.addEventListener('click', (event) => {
-              if (blockedUrls.some((url) => link.href.includes(url))) {
-                event.preventDefault();
-                console.log(`Blocked link: ${link.href}`);
-              }
-            });
-          });
-
-          iframe.removeAttribute('referrerpolicy');
-        }
-      } catch (error) {
-        console.error('Error accessing iframe content:', error);
-      }
-    }
-  };
-
-  const handleAddToWatchlist = async (tvShow: TvShow) => {
-    try {
-      if (!user?.uuid) {
-        toast.error('Please log in to add to watchlist')
-        return
-      }
-
-      if (!tvShow) return
-
-      await axios.post(
-        'http://localhost:3003/api/users/watchlist',
-        {
-          uuid: user.uuid,
-          movie: {
-            id: tvShow.id,
-            title: tvShow.name,
-            release_date: tvShow.first_air_date,
-            poster_path: tvShow.poster_path,
-            media_type: 'tv'
-          }
-        }
-      )
-
-      toast.success('Added to Watchlist')
-      setWatchlist(prev => [...prev, tvShow.id])
-    } catch (error) {
-      if (axios.isAxiosError(error) && error.response?.status === 400) {
-        toast.error('Show is already in your watchlist')
-      } else {
-        toast.error('Failed to add show to watchlist')
-      }
-    }
   }
 
   const handleLoadMore = () => {
     setDisplayedEpisodes(prev => prev + 25)
   }
 
-  if (loading) return (
+  if (isLoading) return (
     <div className="flex justify-center items-center min-h-screen bg-gray-900">
       <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-pink-500"></div>
     </div>
@@ -215,12 +84,14 @@ export default function TvVideoPage() {
   if (error) return (
     <div className="min-h-screen flex items-center justify-center bg-gray-900">
       <div className="bg-red-900 text-red-100 p-4 rounded-lg">
-        Error: {error}
+        Error: {error.message}
       </div>
     </div>
   )
 
-  if (!tvShow) return null
+  if (!tvShowData) return null
+
+  const { tvShow, cast, similar, images } = tvShowData
 
   return (
     <div className="min-h-screen bg-gray-900">
@@ -232,14 +103,14 @@ export default function TvVideoPage() {
           <img
             src={`https://image.tmdb.org/t/p/original${selectedImage}`}
             alt="Gallery"
-            className="max-w-full max-h-[90vh] object-contain"
+            className="max-w-full max-h-[90vh] object-contain "
           />
         </div>
       )}
 
-      <div className="relative min-h-screen">
+      <div className="relative min-h-screen ">
         <div
-          className="absolute inset-0 bg-cover bg-center"
+          className="absolute inset-0 bg-cover bg-center "
           style={{
             backgroundImage: `url(https://image.tmdb.org/t/p/original${tvShow.backdrop_path})`
           }}
@@ -263,27 +134,19 @@ export default function TvVideoPage() {
 
           <p className="text-gray-300 max-w-2xl mb-8 text-sm sm:text-base">{tvShow.overview}</p>
           <div className='flex items-center gap-3 pt-2 mt-[-20px] mb-10'>
-          <Button
-                  onClick={() => setShowVideo(true)}
-                  size="sm"
-                  className="h-10 px-6 rounded-full bg-pink-500 hover:bg-white/90 text-black font-semibold transition-all duration-300"
-                >
-                  <Play className="mr-2 h-4 w-4 fill-black" />
-                  Watch Now
-                </Button>
-          <Button
-                  onClick={() => handleAddToWatchlist(tvShow)}
-                  variant="outline"
-                  size="sm"
-                  className="h-10 px-6 rounded-full border-white/20 bg-white/10 hover:bg-white/20 text-white font-semibold transition-all duration-300"
-                >
-                  {watchlist.includes(tvShow.id) ? (
-                    <Check className="mr-2 h-4 w-4" />
-                  ) : (
-                    <Plus className="mr-2 h-4 w-4" />
-                  )}
-                  {watchlist.includes(tvShow.id) ? 'Added' : 'Watchlist'}
-                </Button>
+            <Button
+              onClick={() => setShowVideo(true)}
+              size="sm"
+              className="h-10 px-6 rounded-full bg-pink-500 hover:bg-white/90 text-black font-semibold transition-all duration-300"
+            >
+              <Play className="mr-2 h-4 w-4 fill-black" />
+              Watch Now
+            </Button>
+            <PlusWatchlistButton
+              currentTv={tvShow}
+              watchlist={watchlist}
+              setWatchlist={setWatchlist}
+            />
           </div>
 
           {/* Mobile Season & Episode Select */}
@@ -312,7 +175,7 @@ export default function TvVideoPage() {
                     <Button variant="ghost" onClick={() => setShowSeasonSelect(false)}>Close</Button>
                   </div>
                   <div className="p-2 ">
-                    {tvShow?.seasons.map((season) => (
+                    {tvShow?.seasons.map((season: Season) => (
                       <button
                         key={season.season_number}
                         onClick={() => {
@@ -342,7 +205,7 @@ export default function TvVideoPage() {
                     <Button variant="ghost" onClick={() => setShowEpisodeSelect(false)}>Close</Button>
                   </div>
                   <div className="p-2">
-                    {episodes.map((episode) => (
+                    {episodes.map((episode:Episode) => (
                       <button
                         key={episode.episode_number}
                         onClick={() => {
@@ -367,7 +230,7 @@ export default function TvVideoPage() {
           {/* Desktop Seasons Section */}
           <div className="hidden md:block mb-8">
             <div className="flex flex-wrap gap-2">
-              {tvShow?.seasons.map((season) => (
+              {tvShow?.seasons.map((season:Season) => (
                 <Button
                   key={season.season_number}
                   variant={selectedSeason === season.season_number ? "default" : "outline"}
@@ -390,7 +253,7 @@ export default function TvVideoPage() {
           {/* Episodes Section */}
           <div className="space-y-6">
             <div className="hidden md:grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 sm:gap-6">
-              {episodes.slice(0, displayedEpisodes).map((episode) => (
+              {episodes.slice(0, displayedEpisodes).map((episode:Episode) => (
                 <button
                   key={episode.episode_number}
                   onClick={() => {
@@ -445,15 +308,13 @@ export default function TvVideoPage() {
                 </Button>
                 <div className="aspect-video w-full bg-black rounded-xl overflow-hidden shadow-2xl">
                   <iframe
-                    ref={iframeRef}
-                    src={`https://vidlink.pro/tv/${movieId}/${selectedSeason}/${selectedEpisode}/?autoplay=true`}
+                    src={`https://vidlink.pro/tv/${movieId}/${selectedSeason}/${selectedEpisode}/?primaryColor=ec4899&secondaryColor=dd9dbd&iconColor=d991b5&icons=vid&player=default&title=true&poster=true&autoplay=true&nextbutton=true`}
                     className="w-full h-full"
                     width="1280"
                     height="720"
                     title="Video player"
                     frameBorder="0"
                     allowFullScreen
-                    onLoad={handleIframeLoad}
                   ></iframe>
                 </div>
               </div>
@@ -466,7 +327,7 @@ export default function TvVideoPage() {
       <div className="max-w-[90rem] mx-auto px-4 sm:px-6 py-12">
         <h2 className="text-xl sm:text-2xl font-bold text-white mb-6">Cast</h2>
         <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7 gap-3 sm:gap-4">
-          {cast.map((actor) => (
+          {cast.map((actor:CastMember) => (
             <div key={actor.id} className="space-y-1 sm:space-y-2">
               {actor.profile_path ? (
                 <img
@@ -490,7 +351,7 @@ export default function TvVideoPage() {
       <div className="max-w-[90rem] mx-auto px-2 sm:px-4 md:px-6 py-6 sm:py-8 md:py-12">
         <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-white mb-4 sm:mb-6">Gallery</h2>
         <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4">
-          {images.backdrops.map((image, index) => (
+          {images.backdrops.map((image:ImageData, index:number) => (
             <button
               key={index}
               onClick={() => setSelectedImage(image.file_path)}
@@ -513,7 +374,7 @@ export default function TvVideoPage() {
       <div className="max-w-[90rem] mx-auto px-2 sm:px-4 md:px-6 py-6 sm:py-8 md:py-12">
         <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-white mb-4 sm:mb-6">Similar shows</h2>
         <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-4">
-          {similar.map((show) => (
+          {similar.map((show:TvShow) => (
             <button
               key={show.id}
               onClick={() => handleSimilarMovieClick(show.id)}

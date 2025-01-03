@@ -55,12 +55,12 @@ export const NavigationLinks = () => {
       </button>
 
       <Link to="/movies" className="flex items-center space-x-3 p-4 text-gray-300 hover:text-blue-400 hover:bg-blue-500/10 rounded-xl transition-all duration-200">
-        <Bookmark className="w-5 h-5" />
+        <Film className="w-5 h-5" />
         <span className="font-medium">Movies</span>
       </Link>
 
       <Link to="/tv-series" className="flex items-center space-x-3 p-4 text-gray-300 hover:text-blue-400 hover:bg-blue-500/10 rounded-xl transition-all duration-200">
-        <Film className="w-5 h-5" />
+        <Tv className="w-5 h-5" />
         <span className="font-medium">TV Series</span>
       </Link>
 

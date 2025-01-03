@@ -26,6 +26,7 @@ export interface SimilarShow {
 export interface ImageData {
   backdrops: { file_path: string }[];
   posters: { file_path: string }[];
+  file_path: string
 }
 
 export interface Movie {
@@ -89,6 +90,9 @@ export interface TvShow {
   vote_average: number;
   vote_count: number;
   media_type: string;
+
+  release_date: string;
+  title: string;
 }
 
 export interface SearchResponse {

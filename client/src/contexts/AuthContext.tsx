@@ -75,7 +75,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // Login method
   const login = async (userData: User) => {
     try {
-      const baseurl = import.meta.env.VITE_BASE_URL;
+      const baseurl = import.meta.env.VITE_BASE_URL2;
       await axios.post(`${baseurl}/api/users`, userData);
 
       setUser(userData);

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import WatchListCard from "@/components/WatchListCard";
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
-import { type Movie } from '@/types/movie'
+import { type Movie } from 'types'
 
 export default function Watchlist() {
   const { user } = useAuth()
@@ -22,7 +22,7 @@ export default function Watchlist() {
         return
       }
 
-      const response = await axios.get(`http://localhost:3003/api/users/watchlist/${user.uuid}`)
+      const response = await axios.get(`https://cinenova-v2-2f7p.vercel.app/api/users/watchlist/${user.uuid}`)
       setWatchlist(response.data.watchlist)
       setLoading(false)
     } catch (error) {
@@ -40,7 +40,7 @@ export default function Watchlist() {
         return
       }
 
-      await axios.delete(`http://localhost:3003/api/users/watchlist/${user.uuid}/${movieId}`)
+      await axios.delete(`https://cinenova-v2-2f7p.vercel.app/api/users/watchlist/${user.uuid}/${movieId}`)
 
       setWatchlist(prev => prev.filter(movie => movie.id !== movieId))
       toast.success('Removed from watchlist')

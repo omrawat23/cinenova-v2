@@ -42,7 +42,7 @@ export function MobileNav() {
       {/* Menu Grid */}
       <div className={cn(
         "fixed inset-x-0 z-50 transition-transform duration-300 ease-in-out transform rounded-lg",
-        isMenuOpen ? "translate-y-0 bottom-16" : "translate-y-full"
+        isMenuOpen ? "translate-y-0 bottom-20" : "translate-y-full"
       )}>
         <div className="bg-black/80 backdrop-blur-md mx-4 rounded-xl p-4">
           <div className="grid grid-cols-4 gap-4">

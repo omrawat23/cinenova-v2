@@ -1,9 +1,8 @@
 'use client'
 
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Card } from '@/components/ui/card'
-import axios from 'axios'
 
 const GENRE_MAP: { [key: number]: string } = {
   28: "Action", 12: "Adventure", 16: "Animation", 35: "Comedy", 80: "Crime",
@@ -24,10 +23,6 @@ interface MovieCardProps {
   genreIds: number[]
 }
 
-interface MovieDetails {
-  runtime: number | null
-  genres: Array<{ id: number; name: string }>
-}
 
 export default function MovieCard({
   type,
@@ -40,36 +35,11 @@ export default function MovieCard({
 }: MovieCardProps) {
   const router = useNavigate()
   const [, setIsHovered] = useState(false)
-  const [details, setDetails] = useState<MovieDetails | null>(null)
 
   const year = new Date(releaseDate).getFullYear()
   const ratingProgress = (voteAverage / 10) * 100
   const primaryGenre = genreIds?.length > 0 ? GENRE_MAP[genreIds[0]] : ''
 
-  useEffect(() => {
-    const fetchDetails = async () => {
-      const apiKey = process.env.NEXT_PUBLIC_TMDB_API_KEY
-      try {
-        const response = await axios.get(
-          `https://api.themoviedb.org/3/${type}/${id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${apiKey}`,
-              accept: 'application/json',
-            },
-          }
-        )
-        setDetails({
-          runtime: response.data.runtime || null,
-          genres: response.data.genres || [],
-        })
-      } catch (error) {
-        console.error('Error fetching details:', error)
-      }
-    }
-
-    fetchDetails()
-  }, [id, type])
 
   const handleMovieClick = useCallback(() => {
     if (type === 'tv') {
@@ -143,12 +113,6 @@ export default function MovieCard({
             <div className="w-full space-y-1 text-white">
               <h3 className="text-base font-medium line-clamp-2">{title}</h3>
               <div className="flex items-center gap-2 text-sm opacity-75 flex-wrap">
-                {details?.runtime && type === 'movie' && (
-                  <>
-                    <span>{details.runtime} min</span>
-                    <span>•</span>
-                  </>
-                )}
                 <span>{year}</span>
                 {primaryGenre && (
                   <>
