@@ -5,7 +5,7 @@ import { Header } from "./components/Header"
 import { MobileNav } from "./components/mobile-nav"
 import { Bookmark,History } from "lucide-react"
 import { Link } from "react-router-dom"
-import CinenovaLogo from "./components/CineNovaLogo"
+import CinenovaLogo from "./components/CinenovaLogo"
 
 interface LayoutProps {
   children: React.ReactNode

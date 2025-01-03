@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import { Link } from 'react-router-dom';
-import { HomeIcon as House, Film, Tv, Bookmark, Search } from 'lucide-react';
+import { HomeIcon as House, Film, Tv, Search } from 'lucide-react';
 import SearchComponent from './SearchComponent';
 
 // First, create a context to manage search state

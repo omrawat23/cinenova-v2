@@ -61,6 +61,7 @@ const SearchComponent: React.FC<SearchComponentProps> = ({ onClose, isActive }) 
     }
   };
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const debouncedSearch = useCallback(
     debounce((query: string) => searchMovies(query), 250),
     [mediaFilter]
