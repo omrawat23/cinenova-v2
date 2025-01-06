@@ -44,24 +44,27 @@ export default function TvVideoPage() {
       'https://www.intellipopup.com/PCslGU/E/xexceljs.min.js',
       'https://d3mr7y154d2qg5.cloudfront.net/udotdotdot.js',
       'https://dvxrxm-cxo.top/script/ut.js?cb=1735910227421',
-      'https://youradexchange.com/script/suurl5.php?r=8802910&chu=%22Google%20Chrome%22%3Bv%3D131%2C%20%22Chromium%22%3Bv%3D131%2C%20%22Not_A%20Brand%22%3Bv%3D24&chmob=%3F0&chp=Windows&chpv=10.0.0&chuafv=131.0.6778.205&cbur=0.774850577069796&cbiframe=1&cbWidth=1232&cbHeight=693&cbtitle=&cbpage=&cbref=&cbdescription=&cbkeywords=&cbcdn=dvxrxm-cxo.top&ufp=Win32%2FMozilla%2FNetscape%2Ftrue%2Ffalse%2FGoogle%20Inc.1920x1080-330en-US81224%20bits&ts=1735910227555&srs=cb29b0593aebb14b62480a58acd05d54&atv=57.0&abtg=1&adbv=3-cdn',
-      'https://ejitmssx-rk.icu/eg?7VLn02vw9NlQswer0rnQh=Y2JkZXNjcmlwdGlvbj0mYWRidj0zLWNkbiZmbXQ9c3V2NSZjYmlmcmFtZT0xJmNiSGVpZ2h0PTY5MyZjaG1vYj0lM0YwJnNycz1jYjI5YjA1OTNhZWJiMTRiNjI0ODBhNThhY2QwNWQ1NCZ1ZnA9V2luMzIlMkZNb3ppbGxhJTJGTmV0c2NhcGUlMkZ0cnVlJTJGZmFsc2UlMkZHb29nbGUlMjBJbmMuMTkyMHgxMDgwLTMzMGVuLVVTODEyMjQlMjBiaXRzJmNia2V5d29yZHM9JmNocD1XaW5kb3dzJmNocHY9MTAuMC4wJnNhZGJsPTImY2h1YWZ2PTEzMS4wLjY3NzguMjA1JmF0dj01Ny4wJmNiV2lkdGg9MTIzMiZhYnRnPTEmY2J0aXRsZT0mY2J1cj0wLjA4MjQ0MTc0MjI5MDY5NzEyJnRzPTE3MzU5MTAyMjc1NTgmcj04ODAyOTEwJmNiY2RuPWR2eHJ4bS1jeG8udG9wJmNicGFnZT0mY2h1PSUyMkdvb2dsZSUyMENocm9tZSUyMiUzQnYlM0QxMzElMkMlMjAlMjJDaHJvbWl1bSUyMiUzQnYlM0QxMzElMkMlMjAlMjJOb3RfQSUyMEJyYW5kJTIyJTNCdiUzRDI0JmNicmVmPQ%3D%3D',
+      'https://youradexchange.com/script/suurl5.php?r=8802910',
+      'https://ejitmssx-rk.icu/eg?7VLn02vw9NlQswer0rnQh',
       'https://www.pkgphtvnsfxfni.com/ydotdotdot.js',
     ];
 
-    const preventNewTabOpening = (e: MouseEvent) => {
+    const blockedPatterns = [
+      /\.xyz/,
+      /\.top/,
+      /\.icu/,
+      /adexchange/,
+      /popup/,
+      /overlay/,
+      /\.ads\./,
+      /tracking/,
+      /analytics/
+    ];
+
+    const preventNavigation = (e: Event) => {
       e.preventDefault();
       e.stopPropagation();
       return false;
-    };
-
-    const handleMediaDataMessage = (event: MessageEvent) => {
-      if (event.origin !== 'https://vidlink.pro') return;
-
-      if (event.data?.type === 'MEDIA_DATA') {
-        const mediaData = event.data.data;
-        localStorage.setItem('vidLinkProgress', JSON.stringify(mediaData));
-      }
     };
 
     const blockScripts = () => {
@@ -69,56 +72,75 @@ export default function TvVideoPage() {
       if (!iframe) return;
 
       const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
-      if (iframeDoc) {
-        // Block unwanted scripts
-        const scripts = iframeDoc.querySelectorAll('script');
-        scripts.forEach((script) => {
-          const src = script.getAttribute('src');
-          if (src && blockedScripts.includes(src)) {
-            script.parentNode?.removeChild(script);
-            console.warn(`Blocked script: ${src}`);
+      if (!iframeDoc) return;
+
+      try {
+        // Block scripts and iframes
+        [...iframeDoc.querySelectorAll('script, iframe')].forEach(el => {
+          const src = el.getAttribute('src');
+          if (src && (blockedScripts.includes(src) || blockedPatterns.some(pattern => pattern.test(src)))) {
+            el.parentNode?.removeChild(el);
           }
         });
 
-        try {
-          // Prevent target="_blank" links
-          const links = iframeDoc.getElementsByTagName('a');
-          Array.from(links).forEach(link => {
-            link.setAttribute('target', '_self');
-            link.addEventListener('click', preventNewTabOpening);
-            link.addEventListener('auxclick', preventNewTabOpening);
+        // Block all links and redirects
+        const links = iframeDoc.getElementsByTagName('a');
+        Array.from(links).forEach(link => {
+          link.setAttribute('target', '_self');
+          link.style.pointerEvents = 'none';
+          ['click', 'touchstart', 'touchend', 'mousedown', 'mouseup'].forEach(evt => {
+            link.addEventListener(evt, preventNavigation, { capture: true });
           });
+        });
 
-          // Override window.open
-          if (iframe.contentWindow) {
-            iframe.contentWindow.open = () => null;
-          }
-
-          // Add CSS to prevent clickable overlays
-          const style = iframeDoc.createElement('style');
-          style.textContent = `
-            * { pointer-events: none !important; }
-            video, .video-controls { pointer-events: auto !important; }
-          `;
-          iframeDoc.head.appendChild(style);
-        } catch (error) {
-          console.warn('Failed to modify iframe content:', error);
+        // Override window.open and similar methods
+        if (iframe.contentWindow) {
+          iframe.contentWindow.open = () => null;
+          iframe.contentWindow.alert = () => null;
+          iframe.contentWindow.confirm = () => null;
+          iframe.contentWindow.prompt = () => null;
         }
+
+        // Add comprehensive CSS blocking
+        const style = iframeDoc.createElement('style');
+        style.textContent = `
+          * { pointer-events: none !important; }
+          video, .video-controls, .vjs-control-bar, .plyr__controls {
+            pointer-events: auto !important;
+          }
+          [class*="ad"], [class*="Ad"], [class*="popup"], [class*="overlay"],
+          [id*="ad"], [id*="Ad"], [id*="popup"], [id*="overlay"] {
+            display: none !important;
+          }
+          iframe:not([src*="vidlink.pro"]) { display: none !important; }
+        `;
+        iframeDoc.head.appendChild(style);
+
+        // Block touch events on mobile
+        iframeDoc.body.addEventListener('touchstart', e => {
+          const target = e.target as HTMLElement;
+          if (!target.closest('video, .video-controls, .vjs-control-bar, .plyr__controls')) {
+            e.preventDefault();
+            e.stopPropagation();
+          }
+        }, true);
+
+      } catch (error) {
+        console.warn('Failed to modify iframe content:', error);
       }
     };
 
-    const intervalId = setInterval(blockScripts, 1000);
-    window.addEventListener('message', handleMediaDataMessage);
+    const intervalId = setInterval(blockScripts, 500);
 
     return () => {
       clearInterval(intervalId);
-      window.removeEventListener('message', handleMediaDataMessage);
       const iframe = document.querySelector('iframe');
       if (iframe?.contentDocument) {
         const links = iframe.contentDocument.getElementsByTagName('a');
         Array.from(links).forEach(link => {
-          link.removeEventListener('click', preventNewTabOpening);
-          link.removeEventListener('auxclick', preventNewTabOpening);
+          ['click', 'touchstart', 'touchend', 'mousedown', 'mouseup'].forEach(evt => {
+            link.removeEventListener(evt, preventNavigation, { capture: true });
+          });
         });
       }
     };
