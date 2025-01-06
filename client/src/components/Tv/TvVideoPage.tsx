@@ -93,11 +93,11 @@ export default function TvVideoPage() {
           });
         });
 
-        // Override window.open and similar methods
+        // Override window.open and similar methods with proper return types
         if (iframe.contentWindow) {
-          iframe.contentWindow.open = () => null;
-          iframe.contentWindow.alert = () => null;
-          iframe.contentWindow.confirm = () => null;
+          iframe.contentWindow.open = () => window;
+          iframe.contentWindow.alert = () => undefined;
+          iframe.contentWindow.confirm = () => false;
           iframe.contentWindow.prompt = () => null;
         }
 
