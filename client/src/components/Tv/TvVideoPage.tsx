@@ -40,7 +40,6 @@ export default function TvVideoPage() {
   }, [showVideo])
 
   useEffect(() => {
-    // Blocked scripts array
     const blockedScripts = [
       'https://www.intellipopup.com/PCslGU/E/xexceljs.min.js',
       'https://d3mr7y154d2qg5.cloudfront.net/udotdotdot.js',
@@ -50,7 +49,12 @@ export default function TvVideoPage() {
       'https://www.pkgphtvnsfxfni.com/ydotdotdot.js',
     ];
 
-    // Handler for media data messages
+    const preventNewTabOpening = (e: MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      return false;
+    };
+
     const handleMediaDataMessage = (event: MessageEvent) => {
       if (event.origin !== 'https://vidlink.pro') return;
 
@@ -60,13 +64,13 @@ export default function TvVideoPage() {
       }
     };
 
-    // Block scripts inside the iframe
     const blockScripts = () => {
       const iframe = document.querySelector('iframe');
       if (!iframe) return;
 
       const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
       if (iframeDoc) {
+        // Block unwanted scripts
         const scripts = iframeDoc.querySelectorAll('script');
         scripts.forEach((script) => {
           const src = script.getAttribute('src');
@@ -75,19 +79,48 @@ export default function TvVideoPage() {
             console.warn(`Blocked script: ${src}`);
           }
         });
+
+        try {
+          // Prevent target="_blank" links
+          const links = iframeDoc.getElementsByTagName('a');
+          Array.from(links).forEach(link => {
+            link.setAttribute('target', '_self');
+            link.addEventListener('click', preventNewTabOpening);
+            link.addEventListener('auxclick', preventNewTabOpening);
+          });
+
+          // Override window.open
+          if (iframe.contentWindow) {
+            iframe.contentWindow.open = () => null;
+          }
+
+          // Add CSS to prevent clickable overlays
+          const style = iframeDoc.createElement('style');
+          style.textContent = `
+            * { pointer-events: none !important; }
+            video, .video-controls { pointer-events: auto !important; }
+          `;
+          iframeDoc.head.appendChild(style);
+        } catch (error) {
+          console.warn('Failed to modify iframe content:', error);
+        }
       }
     };
 
-    // Set up the interval to block scripts every 1000ms (1 second)
     const intervalId = setInterval(blockScripts, 1000);
-
-    // Add event listener for media data messages
     window.addEventListener('message', handleMediaDataMessage);
 
-    // Cleanup function to remove event listener and clear interval
     return () => {
-      clearInterval(intervalId); // Stop blocking scripts
-      window.removeEventListener('message', handleMediaDataMessage); // Remove event listener
+      clearInterval(intervalId);
+      window.removeEventListener('message', handleMediaDataMessage);
+      const iframe = document.querySelector('iframe');
+      if (iframe?.contentDocument) {
+        const links = iframe.contentDocument.getElementsByTagName('a');
+        Array.from(links).forEach(link => {
+          link.removeEventListener('click', preventNewTabOpening);
+          link.removeEventListener('auxclick', preventNewTabOpening);
+        });
+      }
     };
   }, []);
 

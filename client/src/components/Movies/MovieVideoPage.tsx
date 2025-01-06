@@ -31,11 +31,18 @@ export default function MovieVideoPage() {
 
     const iframe = document.querySelector('iframe');
 
+    const preventNewTabOpening = (e: MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      return false;
+    };
+
     const blockScripts = () => {
       if (!iframe) return;
 
       const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
       if (iframeDoc) {
+        // Block unwanted scripts
         const scripts = iframeDoc.querySelectorAll('script');
         scripts.forEach((script) => {
           const src = script.getAttribute('src');
@@ -44,12 +51,48 @@ export default function MovieVideoPage() {
             console.warn(`Blocked script: ${src}`);
           }
         });
+
+        // Block new tab/window openings
+        try {
+          // Prevent target="_blank" links
+          const links = iframeDoc.getElementsByTagName('a');
+          Array.from(links).forEach(link => {
+            link.setAttribute('target', '_self');
+            link.addEventListener('click', preventNewTabOpening);
+            link.addEventListener('auxclick', preventNewTabOpening); // Prevents middle-click
+          });
+
+          // Override window.open
+          if (iframe.contentWindow) {
+            iframe.contentWindow.open = () => null;
+          }
+
+          // Add CSS to prevent clickable overlays
+          const style = iframeDoc.createElement('style');
+          style.textContent = `
+            * { pointer-events: none !important; }
+            video, .video-controls { pointer-events: auto !important; }
+          `;
+          iframeDoc.head.appendChild(style);
+        } catch (error) {
+          console.warn('Failed to modify iframe content:', error);
+        }
       }
     };
 
     const intervalId = setInterval(blockScripts, 1000);
 
-    return () => clearInterval(intervalId);
+    // Cleanup
+    return () => {
+      clearInterval(intervalId);
+      if (iframe?.contentDocument) {
+        const links = iframe.contentDocument.getElementsByTagName('a');
+        Array.from(links).forEach(link => {
+          link.removeEventListener('click', preventNewTabOpening);
+          link.removeEventListener('auxclick', preventNewTabOpening);
+        });
+      }
+    };
   }, [movieId]);
 
   useEffect(() => {
