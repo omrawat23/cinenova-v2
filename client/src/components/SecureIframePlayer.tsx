@@ -24,11 +24,17 @@ export default function SecureIframePlayer({ src, onClose }: SecureIframePlayerP
     const blockedScripts = [
       'https://www.intellipopup.com/PCslGU/E/xexceljs.min.js',
       'https://d3mr7y154d2qg5.cloudfront.net/udotdotdot.js',
-      'https://dvxrxm-cxo.top/script/ut.js?cb=1735910227421',
-      'https://youradexchange.com/script/suurl5.php?r=8802910',
-      'https://ejitmssx-rk.icu/eg?7VLn02vw9NlQswer0rnQh',
+      'https://dvxrxm-cxo.top/script/ut.js',
+      'https://youradexchange.com/script/suurl5.php',
+      'https://ejitmssx-rk.icu/eg',
       'https://www.pkgphtvnsfxfni.com/ydotdotdot.js',
-    ]
+      'https://s0-greate.net/p/1345575',
+      'https://mc.yandex.ru/metrika/tag.js',
+      'https://mc.yandex.ru/watch/98154677',
+      'https://www.clarity.ms/tag/nske6pmog4',
+      'https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015',
+      'https://cdn.jwplayer.com/libraries/KB5zFt7A.js',
+    ];
 
     const blockedPatterns = [
       /\.xyz/,

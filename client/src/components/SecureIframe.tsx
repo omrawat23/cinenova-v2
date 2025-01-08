@@ -18,7 +18,13 @@ export function SecureIframe({ src, title, className, width, height }: SecureIfr
       'https://dvxrxm-cxo.top/script/ut.js',
       'https://youradexchange.com/script/suurl5.php',
       'https://ejitmssx-rk.icu/eg',
-      'https://www.pkgphtvnsfxfni.com/ydotdotdot.js'
+      'https://www.pkgphtvnsfxfni.com/ydotdotdot.js',
+      'https://s0-greate.net/p/1345575',
+      'https://mc.yandex.ru/metrika/tag.js',
+      'https://mc.yandex.ru/watch/98154677',
+      'https://www.clarity.ms/tag/nske6pmog4',
+      'https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015',
+      'https://cdn.jwplayer.com/libraries/KB5zFt7A.js',
     ];
 
     const preventNewTabOpening = (e: Event) => {
@@ -27,7 +33,7 @@ export function SecureIframe({ src, title, className, width, height }: SecureIfr
       return false;
     };
 
-    const blockScripts = () => {
+    const blockUnwantedContent = () => {
       if (!iframeRef.current) return;
 
       try {
@@ -38,38 +44,32 @@ export function SecureIframe({ src, title, className, width, height }: SecureIfr
         const scripts = iframeDoc.querySelectorAll('script');
         scripts.forEach((script) => {
           const src = script.getAttribute('src');
-          if (src && blockedScripts.some(blocked => src.includes(blocked))) {
+          if (src && blockedScripts.some((blocked) => src.includes(blocked))) {
             script.parentNode?.removeChild(script);
           }
         });
 
-        // Handle mobile and desktop links
+        // Prevent new tabs and modify links
         const links = iframeDoc.getElementsByTagName('a');
-        Array.from(links).forEach(link => {
+        Array.from(links).forEach((link) => {
           link.setAttribute('target', '_self');
-          // Mobile-specific events
-          link.addEventListener('touchstart', preventNewTabOpening, { passive: false });
-          link.addEventListener('touchend', preventNewTabOpening, { passive: false });
-          // Desktop events
           link.addEventListener('click', preventNewTabOpening);
           link.addEventListener('auxclick', preventNewTabOpening);
+          link.addEventListener('touchstart', preventNewTabOpening, { passive: false });
+          link.addEventListener('touchend', preventNewTabOpening, { passive: false });
         });
 
-        // Override window.open for both platforms
+        // Disable window.open
         if (iframeRef.current.contentWindow) {
           iframeRef.current.contentWindow.open = () => null;
-          // Mobile popup blocking
-          iframeRef.current.contentWindow.addEventListener('popstate', preventNewTabOpening);
         }
 
-        // Enhanced CSS for mobile and desktop
+        // Apply enhanced styles for interaction
         const style = iframeDoc.createElement('style');
         style.textContent = `
           * {
             pointer-events: none !important;
             user-select: none !important;
-            -webkit-touch-callout: none !important;
-            -webkit-tap-highlight-color: transparent !important;
           }
           video, .video-controls {
             pointer-events: auto !important;
@@ -82,8 +82,7 @@ export function SecureIframe({ src, title, className, width, height }: SecureIfr
       }
     };
 
-    // Run more frequently on mobile
-    const intervalId = setInterval(blockScripts, 500);
+    const intervalId = setInterval(blockUnwantedContent, 500);
 
     return () => {
       clearInterval(intervalId);
@@ -95,14 +94,14 @@ export function SecureIframe({ src, title, className, width, height }: SecureIfr
         if (!iframeDoc) return;
 
         const links = iframeDoc.getElementsByTagName('a');
-        Array.from(links).forEach(link => {
-          link.removeEventListener('touchstart', preventNewTabOpening);
-          link.removeEventListener('touchend', preventNewTabOpening);
+        Array.from(links).forEach((link) => {
           link.removeEventListener('click', preventNewTabOpening);
           link.removeEventListener('auxclick', preventNewTabOpening);
+          link.removeEventListener('touchstart', preventNewTabOpening);
+          link.removeEventListener('touchend', preventNewTabOpening);
         });
       } catch (error) {
-        console.warn('Failed to cleanup iframe:', error);
+        console.warn('Failed to clean up iframe:', error);
       }
     };
   }, []);
