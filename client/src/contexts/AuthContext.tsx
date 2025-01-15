@@ -75,8 +75,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // Login method
   const login = async (userData: User) => {
     try {
-      const baseurl = import.meta.env.VITE_BASE_URL2;
-      await axios.post(`${baseurl}/api/users`, userData);
+      await axios.post('https://cinenova-v2-2f7p.vercel.app/api/users', userData);
 
       setUser(userData);
       setIsAuthenticated(true);
