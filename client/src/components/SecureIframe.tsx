@@ -21,7 +21,7 @@ export function SecureIframe({ src, title, className, width, height }: SecureIfr
       height={height}
       frameBorder="0"
       allowFullScreen
-      referrerPolicy="no-referrer"
+      sandbox="allow-same-origin allow-scripts allow-presentation"
     />
   );
 }

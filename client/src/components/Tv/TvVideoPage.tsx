@@ -67,7 +67,7 @@ export default function TvVideoPage() {
 
   const { tvShow, cast, similar, images } = tvShowData
 
-  const videoUrl = `https://vidlink.pro/tv/${movieId}/${selectedSeason}/${selectedEpisode}/?primaryColor=ec4899&secondaryColor=dd9dbd&iconColor=d991b5&icons=vid&player=default&title=true&poster=true&autoplay=true&nextbutton=true`
+  const videoUrl = `https://vidsrc.cc/v2/embed/tv/${movieId}/${selectedSeason}/${selectedEpisode}/?primaryColor=ec4899&secondaryColor=dd9dbd&iconColor=d991b5&icons=vid&player=default&title=true&poster=true&autoplay=true&nextbutton=true`
 
   return (
     <div className="min-h-screen bg-gray-900">
