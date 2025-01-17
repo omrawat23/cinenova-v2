@@ -68,7 +68,7 @@ export default function MovieVideoPage() {
           {showVideo ? (
             <div className="aspect-video w-full max-w-7xl mx-auto bg-black rounded-xl overflow-hidden shadow-2xl">
               <SecureIframe
-                src={`https://vidsrc.cc/v2/embed/movie/${movieId}/?primaryColor=3d59ad&secondaryColor=697ab0&iconColor=697ab0&icons=vid&player=default&title=true&poster=true&autoplay=true&nextbutton=true`}
+                src={`https://vidlink.pro/movie/${movieId}/?primaryColor=3d59ad&secondaryColor=697ab0&iconColor=697ab0&icons=vid&player=default&title=true&poster=true&autoplay=true&nextbutton=true`}
                 className="aspect-video w-full h-full rounded-lg relative"
                 width="1280"
                 height="720"
