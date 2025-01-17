@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Play, User2, ImageIcon } from 'lucide-react';
 import PlusWatchlistButton from '../PlusWatchlistButton';
@@ -15,6 +15,23 @@ export default function MovieVideoPage() {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   const { data, isLoading, error } = useMovieData(movieId || '');
+
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      if (event.origin !== 'https://vidlink.pro') return;
+
+      if (event.data?.type === 'MEDIA_DATA') {
+        const mediaData = event.data.data;
+        localStorage.setItem('vidLinkProgress', JSON.stringify(mediaData));
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+
+    return () => {
+      window.removeEventListener('message', handleMessage);
+    };
+  }, []);
 
   const handleSimilarMovieClick = (similarMovieId: number) => {
     navigate(`/videopage/${similarMovieId}`);

@@ -29,7 +29,6 @@ export default function SecureIframePlayer({ src, onClose }: SecureIframePlayerP
             title="Video player"
             frameBorder="0"
             allowFullScreen
-            sandbox="allow-same-origin allow-scripts allow-presentation"
           ></iframe>
         </div>
       </div>
