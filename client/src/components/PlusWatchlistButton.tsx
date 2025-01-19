@@ -64,6 +64,7 @@ export default function PlusWatchlistButton({
         }
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [user, currentMovie, currentTv, setWatchlist]
   );
 
