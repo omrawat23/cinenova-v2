@@ -12,6 +12,7 @@ export default function Watchlist() {
   const navigate = useNavigate()
   const [watchlist, setWatchlist] = useState<Movie[]>([])
   const [loading, setLoading] = useState(true)
+  const baseUrl = import.meta.env.VITE_BASE_URL;
 
   // Fetch user's watchlist
   const fetchWatchlist = async () => {
@@ -22,7 +23,7 @@ export default function Watchlist() {
         return
       }
 
-      const response = await axios.get(`https://cinenova-v2-2f7p.vercel.app/api/users/watchlist/${user.uuid}`)
+      const response = await axios.get(`${baseUrl}/api/users/watchlist/${user.uuid}`)
       setWatchlist(response.data.watchlist)
       setLoading(false)
     } catch (error) {
@@ -40,7 +41,7 @@ export default function Watchlist() {
         return
       }
 
-      await axios.delete(`https://cinenova-v2-2f7p.vercel.app/api/users/watchlist/${user.uuid}/${movieId}`)
+      await axios.delete(`${baseUrl}/api/users/watchlist/${user.uuid}/${movieId}`)
 
       setWatchlist(prev => prev.filter(movie => movie.id !== movieId))
       toast.success('Removed from watchlist')

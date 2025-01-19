@@ -25,6 +25,7 @@ export default function PlusWatchlistButton({
 }: PlusWatchlistButtonProps) {
 
   const { user } = useAuth() as { user: User | null }; // Assuming user can be null if unauthenticated
+  const baseUrl = import.meta.env.VITE_BASE_URL;
 
   const handleAddToWatchlist = useCallback(
     async () => {
@@ -42,7 +43,7 @@ export default function PlusWatchlistButton({
       const mediaType = currentMovie ? "movie" : "tv";
 
       try {
-        await axios.post("https://cinenova-v2-2f7p.vercel.app/api/users/watchlist", {
+        await axios.post(`${baseUrl}/api/users/watchlist`, {
           uuid: user.uuid,
           movie: {
             id: movie.id, // Use media.id to handle both movies and TV shows

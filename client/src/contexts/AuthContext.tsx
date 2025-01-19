@@ -36,6 +36,7 @@ const AuthContext = createContext<AuthContextType>({
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const baseUrl = import.meta.env.VITE_BASE_URL;
 
   // Initialize authentication state
   useEffect(() => {
@@ -75,7 +76,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // Login method
   const login = async (userData: User) => {
     try {
-      await axios.post('https://cinenova-v2-2f7p.vercel.app/api/users', userData);
+      await axios.post(`${baseUrl}/api/users`, userData);
 
       setUser(userData);
       setIsAuthenticated(true);
