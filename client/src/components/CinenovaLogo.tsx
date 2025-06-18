@@ -14,7 +14,7 @@ const CinenovaLogo = () => {
       {/* Text Logo */}
       <div className="flex flex-col">
         <h1 className="text-2xl font-bold tracking-tight bg-gradient-to-r from-white via-blue-400 to-white bg-clip-text text-transparent group-hover:to-blue-400 transition-colors duration-500">
-          CINENOVA
+          CINENOV
         </h1>
         <div className="h-0.5 w-0 group-hover:w-full bg-blue-500 transition-all duration-500" />
       </div>
