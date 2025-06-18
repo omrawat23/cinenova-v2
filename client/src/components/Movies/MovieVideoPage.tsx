@@ -3,11 +3,11 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Play, User2, ImageIcon } from 'lucide-react';
 import PlusWatchlistButton from '../PlusWatchlistButton';
 import { Button } from '../ui/button';
+import { SecureIframe } from '@/components/SecureIframe';
 import type { Movie, CastMember, ImageData } from 'types';
 import { useMovieData } from '@/hooks/useMovieData';
 
 export default function MovieVideoPage() {
-
   const { movieId } = useParams<{ movieId: string }>();
   const navigate = useNavigate();
   const [watchlist, setWatchlist] = useState<number[]>([]);
@@ -17,10 +17,7 @@ export default function MovieVideoPage() {
   const { data, isLoading, error } = useMovieData(movieId || '');
 
   useEffect(() => {
-    setShowVideo(false);
-    setSelectedImage(null);
-
-    const handleMediaDataMessage = (event: MessageEvent) => {
+    const handleMessage = (event: MessageEvent) => {
       if (event.origin !== 'https://vidlink.pro') return;
 
       if (event.data?.type === 'MEDIA_DATA') {
@@ -29,24 +26,12 @@ export default function MovieVideoPage() {
       }
     };
 
-    const handleClick = (event: MouseEvent) => {
-      const iframe = document.querySelector('iframe');
-      if (iframe && iframe.contains(event.target as Node)) {
-        event.preventDefault();
-        event.stopPropagation();
-        alert('Pop-ups are blocked!');
-      }
-    };
-
-    window.addEventListener('message', handleMediaDataMessage);
-    window.addEventListener('click', handleClick);
+    window.addEventListener('message', handleMessage);
 
     return () => {
-      window.removeEventListener('message', handleMediaDataMessage);
-      window.removeEventListener('click', handleClick);
+      window.removeEventListener('message', handleMessage);
     };
-  }, [movieId]);
-
+  }, []);
 
   const handleSimilarMovieClick = (similarMovieId: number) => {
     navigate(`/videopage/${similarMovieId}`);
@@ -79,12 +64,12 @@ export default function MovieVideoPage() {
           <img
             src={`https://image.tmdb.org/t/p/original${selectedImage}`}
             alt="Gallery"
-            className="max-w-full max-h-[90vh] object-contain "
+            className="max-w-full max-h-[90vh] object-contain"
           />
         </div>
       )}
 
-      <div className="relative min-h-screen md:h-screen ">
+      <div className="relative min-h-screen md:h-screen">
         <div
           className="absolute inset-0 bg-cover bg-center rounded-2xl"
           style={{
@@ -96,19 +81,16 @@ export default function MovieVideoPage() {
           </div>
         </div>
 
-        <div className="relative h-full max-w-7xl mx-auto px-4 sm:px-6 py-12 flex flex-col justify-center ">
+        <div className="relative h-full max-w-7xl mx-auto px-4 sm:px-6 py-12 flex flex-col justify-center">
           {showVideo ? (
             <div className="aspect-video w-full max-w-7xl mx-auto bg-black rounded-xl overflow-hidden shadow-2xl">
-              <iframe
+              <SecureIframe
                 src={`https://vidlink.pro/movie/${movieId}/?primaryColor=3d59ad&secondaryColor=697ab0&iconColor=697ab0&icons=vid&player=default&title=true&poster=true&autoplay=true&nextbutton=true`}
                 className="aspect-video w-full h-full rounded-lg relative"
                 width="1280"
                 height="720"
                 title="Video player"
-                frameBorder="0"
-                allowFullScreen
-                referrerPolicy="no-referrer"
-              ></iframe>
+              />
             </div>
           ) : (
             <>

@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState,useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Play, User2, ImageIcon, ChevronDown} from 'lucide-react'
 import { Button } from "@/components/ui/button"
@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils"
 import type { Episode, TvShow, CastMember, ImageData, Season } from 'types'
 import { useTvShowData, useEpisodes } from '@/hooks/useTvShowData'
 import PlusWatchlistButton from '../PlusWatchlistButton'
+import SecureIframePlayer from '@/components/SecureIframePlayer'
 
 export default function TvVideoPage() {
   const { movieId } = useParams<{ movieId: string }>()
@@ -17,55 +18,27 @@ export default function TvVideoPage() {
   const [displayedEpisodes, setDisplayedEpisodes] = useState<number>(25)
   const [showSeasonSelect, setShowSeasonSelect] = useState(false)
   const [showEpisodeSelect, setShowEpisodeSelect] = useState(false)
-  const videoRef = useRef<HTMLDivElement>(null)
   const [watchlist, setWatchlist] = useState<number[]>([])
 
   const { data: tvShowData, isLoading, error } = useTvShowData(movieId || '')
   const { data: episodes = [] } = useEpisodes(movieId || '', selectedSeason)
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (videoRef.current && !videoRef.current.contains(event.target as Node)) {
-        setShowVideo(false)
-      }
-    }
+    useEffect(() => {
+      const handleMessage = (event: MessageEvent) => {
+        if (event.origin !== 'https://vidlink.pro') return;
 
-    if (showVideo) {
-      document.addEventListener('mousedown', handleClickOutside)
-    }
+        if (event.data?.type === 'MEDIA_DATA') {
+          const mediaData = event.data.data;
+          localStorage.setItem('vidLinkProgress', JSON.stringify(mediaData));
+        }
+      };
 
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
-    }
-  }, [showVideo])
+      window.addEventListener('message', handleMessage);
 
-  useEffect(() => {
-    const handleMediaDataMessage = (event: MessageEvent) => {
-      if (event.origin !== 'https://vidlink.pro') return;
-
-      if (event.data?.type === 'MEDIA_DATA') {
-        const mediaData = event.data.data;
-        localStorage.setItem('vidLinkProgress', JSON.stringify(mediaData));
-      }
-    };
-
-    const handleClick = (event: MouseEvent) => {
-      const iframe = document.querySelector('iframe');
-      if (iframe && iframe.contains(event.target as Node)) {
-        event.preventDefault();
-        event.stopPropagation();
-        alert('Pop-ups are blocked!');
-      }
-    };
-
-    window.addEventListener('message', handleMediaDataMessage);
-    window.addEventListener('click', handleClick);
-
-    return () => {
-      window.removeEventListener('message', handleMediaDataMessage);
-      window.removeEventListener('click', handleClick);
-    };
-  }, []);
+      return () => {
+        window.removeEventListener('message', handleMessage);
+      };
+    }, []);
 
   const handleSimilarMovieClick = (similarMovieId: number) => {
     navigate(`/tv-videopage/${similarMovieId}`)
@@ -92,6 +65,8 @@ export default function TvVideoPage() {
   if (!tvShowData) return null
 
   const { tvShow, cast, similar, images } = tvShowData
+
+  const videoUrl = `https://vidlink.pro/tv/${movieId}/${selectedSeason}/${selectedEpisode}/?primaryColor=ec4899&secondaryColor=dd9dbd&iconColor=d991b5&icons=vid&player=default&title=true&poster=true&autoplay=true&nextbutton=true`
 
   return (
     <div className="min-h-screen bg-gray-900">
@@ -297,28 +272,10 @@ export default function TvVideoPage() {
 
           {/* Video Modal */}
           {showVideo && selectedEpisode && (
-            <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4">
-              <div ref={videoRef} className="relative w-full max-w-7xl">
-                <Button
-                  className="absolute -top-12 right-0 text-white hover:text-gray-300"
-                  variant="ghost"
-                  onClick={() => setShowVideo(false)}
-                >
-                  Close
-                </Button>
-                <div className="aspect-video w-full bg-black rounded-xl overflow-hidden shadow-2xl">
-                  <iframe
-                    src={`https://vidlink.pro/tv/${movieId}/${selectedSeason}/${selectedEpisode}/?primaryColor=ec4899&secondaryColor=dd9dbd&iconColor=d991b5&icons=vid&player=default&title=true&poster=true&autoplay=true&nextbutton=true`}
-                    className="w-full h-full"
-                    width="1280"
-                    height="720"
-                    title="Video player"
-                    frameBorder="0"
-                    allowFullScreen
-                  ></iframe>
-                </div>
-              </div>
-            </div>
+            <SecureIframePlayer
+              src={videoUrl}
+              onClose={() => setShowVideo(false)}
+            />
           )}
         </div>
       </div>
