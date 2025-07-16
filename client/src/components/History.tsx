@@ -22,10 +22,23 @@ const WatchHistoryCard: React.FC<{
 }> = ({ media, onRemove }) => {
   const progressPercentage = (media.progress.watched / media.progress.duration) * 100;
 
+  // Construct the appropriate URL based on media type
+  const getMediaUrl = () => {
+    if (media.type === 'movie') {
+      return `/videopage/${media.id}?autoplay=true`;
+    } else {
+      // For TV shows, include season and episode if available
+      const season = media.last_season_watched || '1';
+      const episode = media.last_episode_watched || '1';
+      return `/tv-videopage/${media.id}?season=${season}&episode=${episode}`;
+    }
+  };
+
   return (
-    <div className="relative group ">
-      <div
-        className="relative rounded-lg overflow-hidden cursor-pointer"
+    <div className="relative group">
+      <Link
+        to={getMediaUrl()}
+        className="block relative rounded-lg overflow-hidden cursor-pointer"
       >
         <img
           src={`https://image.tmdb.org/t/p/w500${media.poster_path}`}
@@ -43,38 +56,33 @@ const WatchHistoryCard: React.FC<{
 
         {/* Hover Overlay */}
         <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-          <Link
-            to={media.type === 'movie' ? `/videopage/${media.id}` : `/tv-videopage/${media.id}`}
-            className="bg-white/20 hover:bg-white/30 p-3 rounded-full"
-          >
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transition-transform hover:scale-110">
-                  <div className="w-12 h-12 rounded-full bg-white/30 flex items-center justify-center backdrop-blur-sm">
-                    <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center">
-                      <div className="w-0 h-0 border-t-[6px] border-t-transparent border-l-[10px] border-l-black border-b-[6px] border-b-transparent ml-1" />
-                    </div>
-                  </div>
-                </div>
-          </Link>
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transition-transform hover:scale-110">
+            <div className="w-12 h-12 rounded-full bg-white/30 flex items-center justify-center backdrop-blur-sm">
+              <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center">
+                <div className="w-0 h-0 border-t-[6px] border-t-transparent border-l-[10px] border-l-black border-b-[6px] border-b-transparent ml-1" />
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
+      </Link>
 
       <div className="p-3">
-          <div className="flex justify-between items-start mb-1">
-            <h4 className="text-sm font-medium truncate flex-1">{media.title}</h4>
-            <button
-              onClick={() => onRemove(media.id)}
-              className="text-muted-foreground hover:text-destructive transition-colors ml-2"
-              aria-label="Remove from Watch History"
-            >
-              <Trash2 className="w-4 h-4" />
-            </button>
-          </div>
-          <p className="text-xs text-muted-foreground">
-            {media.type === 'tv' ? 'TV Show' : 'Movie'}
-            {media.type === 'tv' && media.last_episode_watched &&
-              ` • Episode ${media.last_episode_watched}`}
-          </p>
+        <div className="flex justify-between items-start mb-1">
+          <h4 className="text-sm font-medium truncate flex-1">{media.title}</h4>
+          <button
+            onClick={() => onRemove(media.id)}
+            className="text-muted-foreground hover:text-destructive transition-colors ml-2"
+            aria-label="Remove from Watch History"
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
         </div>
+        <p className="text-xs text-muted-foreground">
+          {media.type === 'tv' ? 'TV Show' : 'Movie'}
+          {media.type === 'tv' && media.last_episode_watched &&
+            ` • S${media.last_season_watched || '1'}E${media.last_episode_watched}`}
+        </p>
+      </div>
     </div>
   );
 };

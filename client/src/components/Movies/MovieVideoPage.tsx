@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { Play, User2, ImageIcon } from 'lucide-react';
 import PlusWatchlistButton from '../PlusWatchlistButton';
 import { Button } from '../ui/button';
@@ -10,15 +10,26 @@ import { useMovieData } from '@/hooks/useMovieData';
 export default function MovieVideoPage() {
   const { movieId } = useParams<{ movieId: string }>();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [watchlist, setWatchlist] = useState<number[]>([]);
   const [showVideo, setShowVideo] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   const { data, isLoading, error } = useMovieData(movieId || '');
 
+  // Handle URL parameters for auto-play
+  useEffect(() => {
+    const autoplayParam = searchParams.get('autoplay');
+
+    if (autoplayParam === 'true') {
+      setShowVideo(true);
+    }
+  }, [searchParams]);
+
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
-      if (event.origin !== 'https://vidlink.pro') return;
+      const vidlinkUrl = import.meta.env.VITE_VIDLINK_URL;
+      if (event.origin !== vidlinkUrl) return;
 
       if (event.data?.type === 'MEDIA_DATA') {
         const mediaData = event.data.data;
@@ -54,6 +65,8 @@ export default function MovieVideoPage() {
 
   if (!data) return null;
 
+  const vidlinkUrl = import.meta.env.VITE_VIDLINK_URL;
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#13141A] to-[#1a1c25]">
       {selectedImage && (
@@ -85,7 +98,7 @@ export default function MovieVideoPage() {
           {showVideo ? (
             <div className="aspect-video w-full max-w-7xl mx-auto bg-black rounded-xl overflow-hidden shadow-2xl">
               <SecureIframe
-                src={`https://vidlink.pro/movie/${movieId}/?primaryColor=3d59ad&secondaryColor=697ab0&iconColor=697ab0&icons=vid&player=default&title=true&poster=true&autoplay=true&nextbutton=true`}
+                src={`${vidlinkUrl}/movie/${movieId}/?primaryColor=3d59ad&secondaryColor=697ab0&iconColor=697ab0&icons=vid&player=default&title=true&poster=true&autoplay=true&nextbutton=true`}
                 className="aspect-video w-full h-full rounded-lg relative"
                 width="1280"
                 height="720"

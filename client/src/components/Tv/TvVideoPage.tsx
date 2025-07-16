@@ -1,5 +1,5 @@
 import { useState,useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import { Play, User2, ImageIcon, ChevronDown} from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -11,6 +11,7 @@ import SecureIframePlayer from '@/components/SecureIframePlayer'
 export default function TvVideoPage() {
   const { movieId } = useParams<{ movieId: string }>()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const [showVideo, setShowVideo] = useState(false)
   const [selectedImage, setSelectedImage] = useState<string | null>(null)
   const [selectedSeason, setSelectedSeason] = useState<number>(1)
@@ -23,22 +24,37 @@ export default function TvVideoPage() {
   const { data: tvShowData, isLoading, error } = useTvShowData(movieId || '')
   const { data: episodes = [] } = useEpisodes(movieId || '', selectedSeason)
 
-    useEffect(() => {
-      const handleMessage = (event: MessageEvent) => {
-        if (event.origin !== 'https://vidlink.pro') return;
+  // Handle URL parameters for season and episode
+  useEffect(() => {
+    const seasonParam = searchParams.get('season');
+    const episodeParam = searchParams.get('episode');
 
-        if (event.data?.type === 'MEDIA_DATA') {
-          const mediaData = event.data.data;
-          localStorage.setItem('vidLinkProgress', JSON.stringify(mediaData));
-        }
-      };
+    if (seasonParam) {
+      setSelectedSeason(parseInt(seasonParam, 10));
+    }
+    if (episodeParam) {
+      setSelectedEpisode(parseInt(episodeParam, 10));
+      setShowVideo(true); // Auto-play if episode is specified
+    }
+  }, [searchParams]);
 
-      window.addEventListener('message', handleMessage);
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      const vidlinkUrl = import.meta.env.VITE_VIDLINK_URL;
+      if (event.origin !== vidlinkUrl) return;
 
-      return () => {
-        window.removeEventListener('message', handleMessage);
-      };
-    }, []);
+      if (event.data?.type === 'MEDIA_DATA') {
+        const mediaData = event.data.data;
+        localStorage.setItem('vidLinkProgress', JSON.stringify(mediaData));
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+
+    return () => {
+      window.removeEventListener('message', handleMessage);
+    };
+  }, []);
 
   const handleSimilarMovieClick = (similarMovieId: number) => {
     navigate(`/tv-videopage/${similarMovieId}`)
@@ -66,7 +82,8 @@ export default function TvVideoPage() {
 
   const { tvShow, cast, similar, images } = tvShowData
 
-  const videoUrl = `https://vidlink.pro/tv/${movieId}/${selectedSeason}/${selectedEpisode}/?primaryColor=ec4899&secondaryColor=dd9dbd&iconColor=d991b5&icons=vid&player=default&title=true&poster=true&autoplay=true&nextbutton=true`
+  const vidlinkUrl = import.meta.env.VITE_VIDLINK_URL;
+  const videoUrl = `${vidlinkUrl}/tv/${movieId}/${selectedSeason}/${selectedEpisode}/?primaryColor=ec4899&secondaryColor=dd9dbd&iconColor=d991b5&icons=vid&player=default&title=true&poster=true&autoplay=true&nextbutton=true`
 
   return (
     <div className="min-h-screen bg-gray-900">
