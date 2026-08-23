@@ -1,4 +1,4 @@
-import { useState,useEffect } from 'react'
+import { useState,useEffect, useMemo } from 'react'
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import { Play, User2, ImageIcon, ChevronDown} from 'lucide-react'
 import { Button } from "@/components/ui/button"
@@ -6,7 +6,8 @@ import { cn } from "@/lib/utils"
 import type { Episode, TvShow, CastMember, ImageData, Season } from 'types'
 import { useTvShowData, useEpisodes } from '@/hooks/useTvShowData'
 import PlusWatchlistButton from '../PlusWatchlistButton'
-import SecureIframePlayer from '@/components/SecureIframePlayer'
+import { VidCorePlayer } from '@/components/VidCorePlayer'
+import { VIDCORE_ORIGIN, VIDLINK_PROGRESS_KEY, readWatchProgress, writeWatchProgress } from '@/lib/vidcore'
 
 export default function TvVideoPage() {
   const { movieId } = useParams<{ movieId: string }>()
@@ -23,6 +24,7 @@ export default function TvVideoPage() {
 
   const { data: tvShowData, isLoading, error } = useTvShowData(movieId || '')
   const { data: episodes = [] } = useEpisodes(movieId || '', selectedSeason)
+  const savedProgress = useMemo(() => (movieId ? readWatchProgress(movieId) : null), [movieId])
 
   // Handle URL parameters for season and episode
   useEffect(() => {
@@ -40,14 +42,21 @@ export default function TvVideoPage() {
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
-      if (event.origin !== 'https://cinesrc.st') return;
+      if (event.origin !== VIDCORE_ORIGIN) return;
+      const eventType = event.data?.type;
+      if (!['play', 'pause', 'seeked', 'ended', 'timeupdate', 'playerstatus'].includes(eventType)) return;
+      const payload = event.data?.data ?? event.data;
+      if (!payload || typeof payload !== 'object') return;
 
-      if (event.data?.type === 'cinesrc:timeupdate') {
-        const currentTime = Number(event.data.currentTime);
-        const duration = Number(event.data.duration);
+      if (eventType === 'timeupdate' || eventType === 'playerstatus' || eventType === 'ended') {
+        const currentTime = Number(payload.currentTime);
+        const duration = Number(payload.duration);
         if (!Number.isFinite(currentTime) || !Number.isFinite(duration) || duration <= 0) return;
+        const percent = Number.isFinite(Number(payload.percent))
+          ? Number(payload.percent)
+          : currentTime / duration;
 
-        const raw = localStorage.getItem('vidLinkProgress');
+        const raw = localStorage.getItem(VIDLINK_PROGRESS_KEY);
         const parsedData: Record<string, unknown> = raw ? JSON.parse(raw) : {};
         parsedData[movieId || ''] = {
           id: Number(movieId),
@@ -62,7 +71,12 @@ export default function TvVideoPage() {
           last_season_watched: String(selectedSeason),
           last_updated: Date.now()
         };
-        localStorage.setItem('vidLinkProgress', JSON.stringify(parsedData));
+        localStorage.setItem(VIDLINK_PROGRESS_KEY, JSON.stringify(parsedData));
+        writeWatchProgress(movieId || '', {
+          time: Math.floor(currentTime),
+          duration: Math.floor(duration),
+          percent
+        });
       }
     };
 
@@ -98,9 +112,6 @@ export default function TvVideoPage() {
   if (!tvShowData) return null
 
   const { tvShow, cast, similar, images } = tvShowData
-
-  const cinesrcUrl = 'https://cinesrc.st';
-  const videoUrl = `${cinesrcUrl}/embed/tv/${movieId}?s=${selectedSeason}&e=${selectedEpisode}&autoplay=true&muted=true&color=%23ec4899`
 
   return (
     <div className="min-h-screen bg-gray-900">
@@ -306,10 +317,30 @@ export default function TvVideoPage() {
 
           {/* Video Modal */}
           {showVideo && selectedEpisode && (
-            <SecureIframePlayer
-              src={videoUrl}
-              onClose={() => setShowVideo(false)}
-            />
+            <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4">
+              <div className="relative w-full max-w-7xl">
+                <Button
+                  className="absolute -top-12 right-0 text-white hover:text-gray-300"
+                  variant="ghost"
+                  onClick={() => setShowVideo(false)}
+                >
+                  Close
+                </Button>
+                <div className="aspect-video w-full bg-black rounded-xl overflow-hidden shadow-2xl">
+                  <VidCorePlayer
+                    id={movieId || ''}
+                    type="tv"
+                    season={selectedSeason}
+                    episode={selectedEpisode}
+                    autoPlay
+                    theme="ec4899"
+                    startAt={savedProgress?.time}
+                    nextButton
+                    autoNext
+                  />
+                </div>
+              </div>
+            </div>
           )}
         </div>
       </div>

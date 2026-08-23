@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Trash2 } from 'lucide-react';
+import { VIDLINK_PROGRESS_KEY } from '@/lib/vidcore';
 
 interface MediaData {
   id: number;
@@ -91,7 +92,7 @@ const WatchHistory: React.FC = () => {
   const [watchHistoryList, setWatchHistoryList] = useState<MediaData[]>([]);
 
   useEffect(() => {
-    const storedData = localStorage.getItem('vidLinkProgress');
+    const storedData = localStorage.getItem(VIDLINK_PROGRESS_KEY);
     if (storedData) {
       const parsedData = JSON.parse(storedData);
       const mediaList = Object.values(parsedData) as MediaData[];
@@ -104,11 +105,11 @@ const WatchHistory: React.FC = () => {
   }, []);
 
   const removeFromWatchHistory = (id: number) => {
-    const storedData = localStorage.getItem('vidLinkProgress');
+    const storedData = localStorage.getItem(VIDLINK_PROGRESS_KEY);
     if (storedData) {
       const parsedData = JSON.parse(storedData);
       delete parsedData[id];
-      localStorage.setItem('vidLinkProgress', JSON.stringify(parsedData));
+      localStorage.setItem(VIDLINK_PROGRESS_KEY, JSON.stringify(parsedData));
 
       setWatchHistoryList(prev => prev.filter(media => media.id !== id));
     }

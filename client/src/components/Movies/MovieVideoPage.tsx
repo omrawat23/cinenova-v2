@@ -1,11 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { Play, User2, ImageIcon } from 'lucide-react';
 import PlusWatchlistButton from '../PlusWatchlistButton';
 import { Button } from '../ui/button';
-import { SecureIframe } from '@/components/SecureIframe';
+import { VidCorePlayer } from '@/components/VidCorePlayer';
 import type { Movie, CastMember, ImageData } from 'types';
 import { useMovieData } from '@/hooks/useMovieData';
+import { VIDCORE_ORIGIN, VIDLINK_PROGRESS_KEY, readWatchProgress, writeWatchProgress } from '@/lib/vidcore';
 
 export default function MovieVideoPage() {
   const { movieId } = useParams<{ movieId: string }>();
@@ -16,6 +17,7 @@ export default function MovieVideoPage() {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   const { data, isLoading, error } = useMovieData(movieId || '');
+  const savedProgress = useMemo(() => (movieId ? readWatchProgress(movieId) : null), [movieId]);
 
   // Handle URL parameters for auto-play
   useEffect(() => {
@@ -28,14 +30,21 @@ export default function MovieVideoPage() {
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
-      if (event.origin !== 'https://cinesrc.st') return;
+      if (event.origin !== VIDCORE_ORIGIN) return;
+      const eventType = event.data?.type;
+      if (!['play', 'pause', 'seeked', 'ended', 'timeupdate', 'playerstatus'].includes(eventType)) return;
+      const payload = event.data?.data ?? event.data;
+      if (!payload || typeof payload !== 'object') return;
 
-      if (event.data?.type === 'cinesrc:timeupdate') {
-        const currentTime = Number(event.data.currentTime);
-        const duration = Number(event.data.duration);
+      if (eventType === 'timeupdate' || eventType === 'playerstatus' || eventType === 'ended') {
+        const currentTime = Number(payload.currentTime);
+        const duration = Number(payload.duration);
         if (!Number.isFinite(currentTime) || !Number.isFinite(duration) || duration <= 0) return;
+        const percent = Number.isFinite(Number(payload.percent))
+          ? Number(payload.percent)
+          : currentTime / duration;
 
-        const raw = localStorage.getItem('vidLinkProgress');
+        const raw = localStorage.getItem(VIDLINK_PROGRESS_KEY);
         const parsedData: Record<string, unknown> = raw ? JSON.parse(raw) : {};
         parsedData[movieId || ''] = {
           id: Number(movieId),
@@ -48,7 +57,12 @@ export default function MovieVideoPage() {
           },
           last_updated: Date.now()
         };
-        localStorage.setItem('vidLinkProgress', JSON.stringify(parsedData));
+        localStorage.setItem(VIDLINK_PROGRESS_KEY, JSON.stringify(parsedData));
+        writeWatchProgress(movieId || '', {
+          time: Math.floor(currentTime),
+          duration: Math.floor(duration),
+          percent
+        });
       }
     };
 
@@ -80,8 +94,6 @@ export default function MovieVideoPage() {
 
   if (!data) return null;
 
-  const cinesrcUrl = 'https://cinesrc.st';
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#13141A] to-[#1a1c25]">
       {selectedImage && (
@@ -112,12 +124,13 @@ export default function MovieVideoPage() {
         <div className="relative h-full max-w-7xl mx-auto px-4 sm:px-6 py-12 flex flex-col justify-center">
           {showVideo ? (
             <div className="aspect-video w-full max-w-7xl mx-auto bg-black rounded-xl overflow-hidden shadow-2xl">
-              <SecureIframe
-                src={`${cinesrcUrl}/embed/movie/${movieId}?autoplay=true&muted=true&color=%233d59ad`}
-                className="aspect-video w-full h-full rounded-lg relative"
-                width="1280"
-                height="720"
-                title="Video player"
+              <VidCorePlayer
+                id={movieId || ''}
+                type="movie"
+                autoPlay
+                theme="3d59ad"
+                startAt={savedProgress?.time}
+                className="rounded-lg"
               />
             </div>
           ) : (
