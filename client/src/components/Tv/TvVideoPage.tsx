@@ -100,7 +100,7 @@ export default function TvVideoPage() {
   const { tvShow, cast, similar, images } = tvShowData
 
   const cinesrcUrl = 'https://cinesrc.st';
-  const videoUrl = `${cinesrcUrl}/embed/tv/${movieId}?s=${selectedSeason}&e=${selectedEpisode}&autoplay=true&color=%23ec4899`
+  const videoUrl = `${cinesrcUrl}/embed/tv/${movieId}?s=${selectedSeason}&e=${selectedEpisode}&autoplay=true&muted=true&color=%23ec4899`
 
   return (
     <div className="min-h-screen bg-gray-900">

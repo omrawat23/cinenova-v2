@@ -113,7 +113,7 @@ export default function MovieVideoPage() {
           {showVideo ? (
             <div className="aspect-video w-full max-w-7xl mx-auto bg-black rounded-xl overflow-hidden shadow-2xl">
               <SecureIframe
-                src={`${cinesrcUrl}/embed/movie/${movieId}?autoplay=true&color=%233d59ad`}
+                src={`${cinesrcUrl}/embed/movie/${movieId}?autoplay=true&muted=true&color=%233d59ad`}
                 className="aspect-video w-full h-full rounded-lg relative"
                 width="1280"
                 height="720"
