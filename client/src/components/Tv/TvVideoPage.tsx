@@ -40,8 +40,7 @@ export default function TvVideoPage() {
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
-      const vidlinkUrl = import.meta.env.VITE_VIDLINK_URL;
-      if (event.origin !== vidlinkUrl) return;
+      if (event.origin !== 'https://cinesrc.st') return;
 
       if (event.data?.type === 'MEDIA_DATA') {
         const mediaData = event.data.data;
@@ -82,8 +81,8 @@ export default function TvVideoPage() {
 
   const { tvShow, cast, similar, images } = tvShowData
 
-  const vidlinkUrl = import.meta.env.VITE_VIDLINK_URL;
-  const videoUrl = `${vidlinkUrl}/tv/${movieId}/${selectedSeason}/${selectedEpisode}/?primaryColor=ec4899&secondaryColor=dd9dbd&iconColor=d991b5&icons=vid&player=default&title=true&poster=true&autoplay=true&nextbutton=true`
+  const cinesrcUrl = 'https://cinesrc.st';
+  const videoUrl = `${cinesrcUrl}/embed/tv/${movieId}?s=${selectedSeason}&e=${selectedEpisode}&autoplay=true&color=%23ec4899`
 
   return (
     <div className="min-h-screen bg-gray-900">
@@ -372,4 +371,3 @@ export default function TvVideoPage() {
     </div>
   )
 }
-

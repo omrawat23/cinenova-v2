@@ -28,8 +28,7 @@ export default function MovieVideoPage() {
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
-      const vidlinkUrl = import.meta.env.VITE_VIDLINK_URL;
-      if (event.origin !== vidlinkUrl) return;
+      if (event.origin !== 'https://cinesrc.st') return;
 
       if (event.data?.type === 'MEDIA_DATA') {
         const mediaData = event.data.data;
@@ -65,7 +64,7 @@ export default function MovieVideoPage() {
 
   if (!data) return null;
 
-  const vidlinkUrl = import.meta.env.VITE_VIDLINK_URL;
+  const cinesrcUrl = 'https://cinesrc.st';
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#13141A] to-[#1a1c25]">
@@ -98,7 +97,7 @@ export default function MovieVideoPage() {
           {showVideo ? (
             <div className="aspect-video w-full max-w-7xl mx-auto bg-black rounded-xl overflow-hidden shadow-2xl">
               <SecureIframe
-                src={`${vidlinkUrl}/movie/${movieId}/?primaryColor=3d59ad&secondaryColor=697ab0&iconColor=697ab0&icons=vid&player=default&title=true&poster=true&autoplay=true&nextbutton=true`}
+                src={`${cinesrcUrl}/embed/movie/${movieId}?autoplay=true&color=%233d59ad`}
                 className="aspect-video w-full h-full rounded-lg relative"
                 width="1280"
                 height="720"
