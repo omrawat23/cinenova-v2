@@ -30,9 +30,25 @@ export default function MovieVideoPage() {
     const handleMessage = (event: MessageEvent) => {
       if (event.origin !== 'https://cinesrc.st') return;
 
-      if (event.data?.type === 'MEDIA_DATA') {
-        const mediaData = event.data.data;
-        localStorage.setItem('vidLinkProgress', JSON.stringify(mediaData));
+      if (event.data?.type === 'cinesrc:timeupdate') {
+        const currentTime = Number(event.data.currentTime);
+        const duration = Number(event.data.duration);
+        if (!Number.isFinite(currentTime) || !Number.isFinite(duration) || duration <= 0) return;
+
+        const raw = localStorage.getItem('vidLinkProgress');
+        const parsedData: Record<string, unknown> = raw ? JSON.parse(raw) : {};
+        parsedData[movieId || ''] = {
+          id: Number(movieId),
+          type: 'movie',
+          title: data?.movie.title || '',
+          poster_path: data?.movie.poster_path || '',
+          progress: {
+            watched: Math.floor(currentTime),
+            duration: Math.floor(duration)
+          },
+          last_updated: Date.now()
+        };
+        localStorage.setItem('vidLinkProgress', JSON.stringify(parsedData));
       }
     };
 
@@ -41,7 +57,7 @@ export default function MovieVideoPage() {
     return () => {
       window.removeEventListener('message', handleMessage);
     };
-  }, []);
+  }, [movieId, data?.movie.poster_path, data?.movie.title]);
 
   const handleSimilarMovieClick = (similarMovieId: number) => {
     navigate(`/videopage/${similarMovieId}`);

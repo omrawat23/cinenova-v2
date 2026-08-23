@@ -42,9 +42,27 @@ export default function TvVideoPage() {
     const handleMessage = (event: MessageEvent) => {
       if (event.origin !== 'https://cinesrc.st') return;
 
-      if (event.data?.type === 'MEDIA_DATA') {
-        const mediaData = event.data.data;
-        localStorage.setItem('vidLinkProgress', JSON.stringify(mediaData));
+      if (event.data?.type === 'cinesrc:timeupdate') {
+        const currentTime = Number(event.data.currentTime);
+        const duration = Number(event.data.duration);
+        if (!Number.isFinite(currentTime) || !Number.isFinite(duration) || duration <= 0) return;
+
+        const raw = localStorage.getItem('vidLinkProgress');
+        const parsedData: Record<string, unknown> = raw ? JSON.parse(raw) : {};
+        parsedData[movieId || ''] = {
+          id: Number(movieId),
+          type: 'tv',
+          title: tvShowData?.tvShow.name || '',
+          poster_path: tvShowData?.tvShow.poster_path || '',
+          progress: {
+            watched: Math.floor(currentTime),
+            duration: Math.floor(duration)
+          },
+          last_episode_watched: String(selectedEpisode),
+          last_season_watched: String(selectedSeason),
+          last_updated: Date.now()
+        };
+        localStorage.setItem('vidLinkProgress', JSON.stringify(parsedData));
       }
     };
 
@@ -53,7 +71,7 @@ export default function TvVideoPage() {
     return () => {
       window.removeEventListener('message', handleMessage);
     };
-  }, []);
+  }, [movieId, selectedEpisode, selectedSeason, tvShowData?.tvShow.name, tvShowData?.tvShow.poster_path]);
 
   const handleSimilarMovieClick = (similarMovieId: number) => {
     navigate(`/tv-videopage/${similarMovieId}`)
