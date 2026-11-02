@@ -5,7 +5,6 @@ import App from './App.tsx';
 import './index.css';
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/react"
-import { ThemeProvider } from "./components/providers";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -23,9 +22,7 @@ createRoot(document.getElementById('root')!).render(
      <QueryClientProvider client={queryClient}>
      <Analytics />
      <SpeedInsights />
-       <ThemeProvider>
-         <App />
-       </ThemeProvider>
+       <App />
      </QueryClientProvider>
   </StrictMode>
 );

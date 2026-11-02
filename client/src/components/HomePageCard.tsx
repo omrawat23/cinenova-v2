@@ -3,7 +3,6 @@
 import { useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Card } from '@/components/ui/card'
-import { Play } from 'lucide-react'
 
 const GENRE_MAP: { [key: number]: string } = {
   28: "Action", 12: "Adventure", 16: "Animation", 35: "Comedy", 80: "Crime",
@@ -53,21 +52,21 @@ export default function MovieCard({
   return (
     <Card
       onClick={handleMovieClick}
-      className="group relative w-full cursor-pointer border-none bg-transparent transition-transform duration-300 ease-out hover:-translate-y-1"
+      className="group relative w-full sm:max-w-[200px] bg-transparent border-none cursor-pointer transition-transform duration-300 ease-in-out "
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <div className="relative aspect-[2/3] overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] shadow-[0_18px_50px_rgba(0,0,0,0.22)]">
+      <div className="relative aspect-[2/3] overflow-hidden rounded-lg shadow-lg">
         <img
           src={`https://image.tmdb.org/t/p/w500${posterPath}`}
           alt={title}
-          className="h-full w-full object-cover transition duration-500 group-hover:scale-105 group-hover:opacity-45"
+          className="h-full w-full object-cover transition-opacity duration-300 group-hover:opacity-30"
         />
 
-        <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/20 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
           <div className="flex h-full flex-col items-center justify-end p-4">
             <div className="absolute left-2 top-2">
-              <span className="rounded-full border border-[#6B97FF]/40 bg-[#6B97FF]/15 px-2 py-0.5 text-xs font-medium text-[#cbd7ff]">
+              <span className="rounded bg-emerald-500 px-2 py-0.5 text-xs font-medium text-white">
                 HD
               </span>
             </div>
@@ -87,7 +86,7 @@ export default function MovieCard({
                       a 15.9155 15.9155 0 0 1 0 31.831
                       a 15.9155 15.9155 0 0 1 0 -31.831"
                     fill="none"
-                    stroke="#6B97FF"
+                    stroke="#fbbf24"
                     strokeWidth="3"
                     strokeDasharray={`${ratingProgress}, 100`}
                   />
@@ -99,10 +98,16 @@ export default function MovieCard({
             </div>
 
             <button
-              className="mb-4 rounded-full border border-white/20 bg-white/10 p-3 backdrop-blur-md transition-transform hover:scale-110"
+              className="mb-4 p-2"
               aria-label={`Play ${title}`}
             >
-              <Play className="h-5 w-5 fill-white text-white" />
+             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transition-transform hover:scale-110">
+                  <div className="w-12 h-12 rounded-full bg-white/30 flex items-center justify-center backdrop-blur-sm">
+                    <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center">
+                      <div className="w-0 h-0 border-t-[6px] border-t-transparent border-l-[10px] border-l-black border-b-[6px] border-b-transparent ml-1" />
+                    </div>
+                  </div>
+                </div>
             </button>
 
             <div className="w-full space-y-1 text-white">
@@ -128,3 +133,4 @@ export default function MovieCard({
     </Card>
   )
 }
+

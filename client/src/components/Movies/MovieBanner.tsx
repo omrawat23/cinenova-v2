@@ -21,7 +21,6 @@ export default function MovieBanner({ movies }: MovieBannerProps) {
 
   // Automatic sliding logic
   useEffect(() => {
-    if (movies.length < 2) return;
     const interval = setInterval(() => {
       setCurrentMovieIndex((prevIndex) =>
         (prevIndex + 1) % movies.length
@@ -34,7 +33,7 @@ export default function MovieBanner({ movies }: MovieBannerProps) {
     navigate(`/videopage/${movieId}`);
   };
 
-  if (movies.length === 0 || !currentMovie) {
+  if (movies.length === 0) {
     return (
       <div className="w-full h-[300px] sm:h-[400px] md:h-[500px] bg-gradient-to-br from-purple-900/10 to-pink-600/5 animate-pulse rounded-2xl sm:rounded-3xl">
         <div className="h-full w-full bg-muted/20 backdrop-blur-xl rounded-2xl sm:rounded-3xl" />
@@ -43,7 +42,7 @@ export default function MovieBanner({ movies }: MovieBannerProps) {
   }
 
   return (
-    <div className="relative w-full h-[300px] sm:h-[400px] md:h-[415px] lg:h-[480px] xl:h-[500px] overflow-hidden rounded-[28px] border border-white/10">
+    <div className="relative w-full h-[300px] sm:h-[400px] md:h-[415px] lg:h-[480px] xl:h-[500px] overflow-hidden rounded-2xl sm:rounded-3xl">
       <div className="absolute inset-0 transition-opacity duration-1000 ease-in-out">
         <img
           src={`https://image.tmdb.org/t/p/original${currentMovie.backdrop_path}`}
@@ -51,21 +50,17 @@ export default function MovieBanner({ movies }: MovieBannerProps) {
           className="absolute inset-0 w-full h-full object-cover"
           loading="lazy"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#0b0d12] via-[#0b0d12]/65 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0b0d12] via-transparent to-black/20" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/60 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-black/30" />
       </div>
 
       <div className="relative h-full flex flex-col justify-end p-4 sm:p-6 md:p-8 lg:p-10">
         <div className="max-w-3xl space-y-2 sm:space-y-4">
-          <div className="mb-3 inline-flex w-fit items-center gap-2 rounded-full border border-[#6B97FF]/30 bg-[#6B97FF]/10 px-3 py-1 text-xs font-medium text-[#cbd7ff]">
-            <span className="h-1.5 w-1.5 rounded-full bg-[#6B97FF]" />
-            Featured tonight
-          </div>
-          <h1 className="text-2xl font-medium leading-[0.98] tracking-[-0.04em] text-white sm:text-3xl md:text-5xl lg:text-6xl">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white tracking-tight leading-none">
             {currentMovie.title}
           </h1>
 
-          <p className="max-w-2xl text-sm font-normal leading-relaxed text-white/70 sm:text-base md:text-lg">
+          <p className="text-sm sm:text-base md:text-lg text-white/80 line-clamp-2 sm:line-clamp-3 font-medium leading-relaxed max-w-2xl">
             {currentMovie.overview}
           </p>
 
@@ -73,7 +68,7 @@ export default function MovieBanner({ movies }: MovieBannerProps) {
             <Button
               onClick={() => handleMovieClick(currentMovie.id)}
               size="sm"
-              className="h-10 rounded-full bg-[#6B97FF] px-6 font-medium text-[#0b0d12] transition-all duration-300 hover:bg-[#86aaff] hover:shadow-[0_0_30px_rgba(107,151,255,0.25)]"
+              className="h-10 px-6 rounded-full bg-white hover:bg-white/90 text-black font-semibold transition-all duration-300"
             >
               <Play className="mr-2 h-4 w-4 fill-black" />
               Watch
