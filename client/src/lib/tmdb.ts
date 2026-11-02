@@ -14,10 +14,7 @@ tmdbClient.interceptors.request.use((config) => {
     throw new Error("VITE_TMDB_API_KEY is not configured");
   }
 
-  config.params = {
-    ...config.params,
-    api_key: apiKey,
-  };
+  config.headers.Authorization = `Bearer ${apiKey}`;
   return config;
 });
 
