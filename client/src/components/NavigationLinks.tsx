@@ -37,10 +37,10 @@ export const NavigationLinks = () => {
   const { setIsSearchActive } = useContext(SearchContext);
 
   return (
-    <div>
-      <Link to="/" className="flex items-center space-x-3 p-4 text-gray-300 hover:text-blue-400 hover:bg-blue-500/10 rounded-xl transition-all duration-200">
+    <div className="space-y-1">
+      <Link to="/" className="nav-item">
         <House className="w-5 h-5" />
-        <span className="font-medium">Home</span>
+        <span>Home</span>
       </Link>
 
       <button
@@ -48,25 +48,25 @@ export const NavigationLinks = () => {
           e.preventDefault();
           setIsSearchActive(true);
         }}
-        className="w-full flex items-center space-x-3 p-4 text-gray-300 hover:text-blue-400 hover:bg-blue-500/10 rounded-xl transition-all duration-200"
+        className="nav-item w-full"
       >
         <Search className="w-5 h-5" />
-        <span className="font-medium">Search</span>
+        <span>Search</span>
       </button>
 
-      <Link to="/movies" className="flex items-center space-x-3 p-4 text-gray-300 hover:text-blue-400 hover:bg-blue-500/10 rounded-xl transition-all duration-200">
+      <Link to="/movies" className="nav-item">
         <Film className="w-5 h-5" />
-        <span className="font-medium">Movies</span>
+        <span>Movies</span>
       </Link>
 
-      <Link to="/tv-series" className="flex items-center space-x-3 p-4 text-gray-300 hover:text-blue-400 hover:bg-blue-500/10 rounded-xl transition-all duration-200">
+      <Link to="/tv-series" className="nav-item">
         <Tv className="w-5 h-5" />
-        <span className="font-medium">TV Series</span>
+        <span>TV Series</span>
       </Link>
 
-      <Link to="/anime" className="flex items-center space-x-3 p-4 text-gray-300 hover:text-blue-400 hover:bg-blue-500/10 rounded-xl transition-all duration-200">
+      <Link to="/anime" className="nav-item">
         <Tv className="w-5 h-5" />
-        <span className="font-medium">Anime</span>
+        <span>Anime</span>
       </Link>
     </div>
   );

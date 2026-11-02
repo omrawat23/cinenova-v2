@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search } from 'lucide-react';
+import { Search, Sparkles } from 'lucide-react';
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 import { useAuth } from "@/contexts/AuthContext";
 import { LoginDialog } from "@/components/LoginButton";
@@ -40,11 +40,11 @@ export const Header: React.FC = () => {
   };
 
   return (
-    <header className="flex justify-between mb-4">
+    <header className="sticky top-0 z-30 flex items-center justify-between gap-3 border-b border-white/[0.06] bg-[#10131a]/90 px-4 py-4 backdrop-blur-xl sm:px-6">
       {/* Search and Category Selection */}
-      <div className="flex space-x-6">
+      <div className="flex min-w-0 items-center gap-3">
         <Select defaultValue="all" onValueChange={handleChange}>
-          <SelectTrigger className="w-16 bg-[#2c2c2c] border-none rounded-3xl pl-4">
+          <SelectTrigger className="hidden h-10 w-[115px] rounded-full border-white/10 bg-white/[0.05] pl-4 text-sm sm:flex">
             <SelectValue placeholder="All" />
           </SelectTrigger>
           <SelectContent>
@@ -55,27 +55,27 @@ export const Header: React.FC = () => {
         </Select>
 
         <div
-          className="relative md:flex sm:w-96 xs:w-44 xxs:w-32"
+          className="relative flex min-w-0 w-[min(48vw,360px)]"
           onClick={() => setIsSearchActive(true)}
         >
-          <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/35" />
           <Input
             type="text"
             placeholder="Search ..."
             readOnly
-            className="w-full bg-[#2c2c2c] border-none rounded-3xl focus:border-blue-500 text-white placeholder-gray-400 h-10"
+            className="h-10 w-full rounded-full border-white/10 bg-white/[0.05] pl-10 text-white placeholder:text-white/35 focus:border-[#6B97FF] focus:ring-0"
           />
         </div>
       </div>
 
       {/* Login or User Dropdown and Support Button */}
-      <div className="flex items-center space-x-4 sm:mr-4">
+      <div className="flex items-center gap-2">
         {!user ? (
-          <Button variant="outline" onClick={() => setLoginOpen(true)}>Login</Button>
+          <Button variant="outline" className="rounded-full border-white/15 bg-transparent" onClick={() => setLoginOpen(true)}>Login</Button>
         ) : (
           <DropdownMenu>
             <DropdownMenuTrigger>
-              <Button variant="ghost" className="flex items-center space-x-2">
+              <Button variant="ghost" className="flex items-center gap-2 rounded-full">
                 <img
                   src={user.imageUrl}
                   
@@ -115,7 +115,7 @@ export const Header: React.FC = () => {
         <div className="hidden sm:flex">
         <Dialog>
           <DialogTrigger asChild>
-            <Button variant="outline">Support 💗</Button>
+            <Button variant="outline" className="rounded-full border-[#6B97FF]/40 text-[#b8caff]"><Sparkles className="mr-2 h-4 w-4" />Support</Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[425px] bg-[#1a1b1e] border-gray-800">
             <DialogHeader className="relative">
@@ -161,4 +161,3 @@ export const Header: React.FC = () => {
 };
 
 export default Header;
-
