@@ -53,7 +53,7 @@ export default function Watchlist() {
 
   // Navigate to movie details
   const handleMovieClick = (movieId: number) => {
-    navigate(`/movie/${movieId}`)
+    navigate(`/videopage/${movieId}`)
   }
 
   // Fetch watchlist on component mount

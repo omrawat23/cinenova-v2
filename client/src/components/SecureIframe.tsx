@@ -29,7 +29,7 @@ export function SecureIframe({ src, title, className, width, height }: SecureIfr
             return false
           })
         }
-      } catch (error) {
+      } catch {
         // Cross-origin restrictions - expected for external iframes
         console.log('Cross-origin iframe detected, applying external restrictions')
       }
@@ -91,4 +91,3 @@ export function SecureIframe({ src, title, className, width, height }: SecureIfr
     />
   );
 }
-

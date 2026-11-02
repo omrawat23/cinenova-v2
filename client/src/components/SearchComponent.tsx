@@ -81,7 +81,11 @@ const SearchComponent: React.FC<SearchComponentProps> = ({ onClose, isActive }) 
     }
   };
 
-  const FilterButton = ({ type, icon: Icon, label }: { type: 'all' | 'movie' | 'tv', icon?: any, label: string }) => (
+  const FilterButton = ({ type, icon: Icon, label }: {
+    type: 'all' | 'movie' | 'tv';
+    icon?: React.ComponentType<{ className?: string }>;
+    label: string;
+  }) => (
     <button
       onClick={() => {
         setMediaFilter(type);

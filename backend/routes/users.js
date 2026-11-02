@@ -7,24 +7,23 @@ router.post('/', async (req, res) => {
   try {
     const { uuid, username, email, imageUrl } = req.body;
 
-    // Check if the user already exists
-    let user = await User.findOne({ uuid });
-    if (user) {
-      return res.status(400).json({ message: 'User already exists' });
+    if (![uuid, username, email, imageUrl].every((value) => typeof value === 'string' && value.trim())) {
+      return res.status(400).json({ message: 'uuid, username, email, and imageUrl are required' });
     }
 
-    // Create a new user
-    user = new User({
-      uuid,
-      username,
-      email,
-      imageUrl,
-    });
+    const user = await User.findOneAndUpdate(
+      { uuid: uuid.trim() },
+      {
+        $set: {
+          username: username.trim(),
+          email: email.trim(),
+          imageUrl: imageUrl.trim()
+        }
+      },
+      { new: true, upsert: true, runValidators: true, setDefaultsOnInsert: true }
+    );
 
-    // Save user to MongoDB
-    await user.save();
-
-    res.status(201).json({ message: 'User created successfully', user });
+    res.status(200).json({ message: 'User saved successfully', user });
   } catch (err) {
     console.error('Error creating user:', err);
     res.status(500).json({ message: 'Server error' });
@@ -37,7 +36,7 @@ router.post('/watchlist', async (req, res) => {
     const { uuid, movie } = req.body;
 
     // Validate input
-    if (!uuid || !movie) {
+    if (!uuid || !movie || !Number.isInteger(movie.id) || typeof movie.title !== 'string') {
       return res.status(400).json({ message: 'UUID and movie data are required' });
     }
 
@@ -69,7 +68,6 @@ router.post('/watchlist', async (req, res) => {
     console.error('Error adding movie to watchlist:', err);
     res.status(500).json({
       message: 'Server error',
-      error: err.message
     });
   }
 });
@@ -100,7 +98,6 @@ router.get('/watchlist/:uuid', async (req, res) => {
     console.error('Error retrieving watchlist:', err);
     res.status(500).json({
       message: 'Server error',
-      error: err.message
     });
   }
 });
@@ -122,8 +119,12 @@ router.delete('/watchlist/:uuid/:movieId', async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    // Remove the movie from the watchlist
-    user.watchlist = user.watchlist.filter((item) => item.id !== parseInt(movieId));
+    const parsedMovieId = Number(movieId);
+    if (!Number.isInteger(parsedMovieId)) {
+      return res.status(400).json({ message: 'Movie ID must be an integer' });
+    }
+
+    user.watchlist = user.watchlist.filter((item) => item.id !== parsedMovieId);
 
     // Save the user with the updated watchlist
     await user.save();
@@ -136,7 +137,6 @@ router.delete('/watchlist/:uuid/:movieId', async (req, res) => {
     console.error('Error removing movie from watchlist:', err);
     res.status(500).json({
       message: 'Server error',
-      error: err.message
     });
   }
 });

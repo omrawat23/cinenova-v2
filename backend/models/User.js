@@ -9,9 +9,9 @@ const userSchema = new mongoose.Schema({
     {
       id: { type: Number, required: true },
       title: { type: String, required: true },
-      release_date: { type: String, required: true },
-      poster_path: { type: String, required: true },
-      media_type: { type: String, required: true },
+      release_date: { type: String, default: '' },
+      poster_path: { type: String, default: '' },
+      media_type: { type: String, enum: ['movie', 'tv'], required: true },
     },
   ],
 });

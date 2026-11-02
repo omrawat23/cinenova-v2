@@ -28,7 +28,7 @@ export default function SecureIframePlayer({ src, onClose }: SecureIframePlayerP
             return false
           })
         }
-      } catch (error) {
+      } catch {
         // Cross-origin restrictions - expected for external iframes
         console.log('Cross-origin iframe detected, applying external restrictions')
       }

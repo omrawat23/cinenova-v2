@@ -1,56 +1,57 @@
 import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
+import tmdbClient from "@/lib/tmdb";
+import type { Movie, TvShow } from "types";
 
-const fetchContent = async (
-  type: "movie" | "tv",
-  category: "popular" | "top_rated" | "upcoming",
-  page: number = 1
-) => {
-  const apiKey = import.meta.env.VITE_TMDB_API_KEY;
-  const response = await axios.get(
-    `https://api.themoviedb.org/3/${type}/${category}`,
+type ContentType = "movie" | "tv";
+type ContentCategory = "popular" | "top_rated" | "upcoming";
+
+const fetchContent = async <T,>(
+  type: ContentType,
+  category: ContentCategory,
+  page: number,
+  signal?: AbortSignal,
+): Promise<T[]> => {
+  const response = await tmdbClient.get<{ results: T[] }>(
+    `/${type}/${category}`,
     {
-      params: {
-        language: "en-US",
-        page,
-      },
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-      },
-    }
+      params: { language: "en-US", page },
+      signal,
+    },
   );
 
   return response.data.results;
 };
 
 export function useContentFetch() {
-  const { data: popularMovies = [], isLoading: loadingPopularMovies } = useQuery({
-    queryKey: ["popularMovies"],
-    queryFn: () => fetchContent("movie", "popular"),
+  const { data: popularMovies = [], isLoading: loadingPopularMovies } = useQuery<Movie[]>({
+    queryKey: ["content", "movie", "popular", 1],
+    queryFn: ({ signal }) => fetchContent<Movie>("movie", "popular", 1, signal),
   });
 
-  const { data: topRatedMovies = [], isLoading: loadingTopRatedMovies } = useQuery({
-    queryKey: ["topRatedMovies"],
-    queryFn: () => fetchContent("movie", "top_rated"),
+  const { data: topRatedMovies = [], isLoading: loadingTopRatedMovies } = useQuery<Movie[]>({
+    queryKey: ["content", "movie", "top_rated", 1],
+    queryFn: ({ signal }) => fetchContent<Movie>("movie", "top_rated", 1, signal),
   });
 
-  const { data: popularTVShows = [], isLoading: loadingTVShows } = useQuery({
-    queryKey: ["popularTVShows"],
-    queryFn: () => fetchContent("tv", "top_rated"),
+  const { data: popularTVShows = [], isLoading: loadingTVShows } = useQuery<TvShow[]>({
+    queryKey: ["content", "tv", "top_rated", 1],
+    queryFn: ({ signal }) => fetchContent<TvShow>("tv", "top_rated", 1, signal),
   });
 
-  const { data: upcomingMovies = [], isLoading: loadingUpcomingMovies } = useQuery({
-    queryKey: ["upcomingMovies"],
-    queryFn: () => fetchContent("movie", "upcoming"),
+  const { data: upcomingMovies = [], isLoading: loadingUpcomingMovies } = useQuery<Movie[]>({
+    queryKey: ["content", "movie", "upcoming", 1],
+    queryFn: ({ signal }) => fetchContent<Movie>("movie", "upcoming", 1, signal),
   });
-
-  const isLoading = loadingPopularMovies || loadingTopRatedMovies || loadingTVShows || loadingUpcomingMovies;
 
   return {
     popularMovies,
     topRatedMovies,
     popularTVShows,
     upcomingMovies,
-    isLoading
+    isLoading:
+      loadingPopularMovies ||
+      loadingTopRatedMovies ||
+      loadingTVShows ||
+      loadingUpcomingMovies,
   };
 }

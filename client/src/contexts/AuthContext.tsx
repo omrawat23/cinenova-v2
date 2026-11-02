@@ -19,16 +19,16 @@ export interface User {
 // Authentication Context Type
 interface AuthContextType {
   user: User | null
-  login: (userData: User) => void
-  logout: () => void
+  login: (userData: User) => Promise<void>
+  logout: () => Promise<void>
   isAuthenticated: boolean
 }
 
 // Create the context with a default value
 const AuthContext = createContext<AuthContextType>({
   user: null,
-  login: () => {},
-  logout: () => {},
+  login: async () => {},
+  logout: async () => {},
   isAuthenticated: false
 })
 
@@ -50,27 +50,23 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         console.error('Error parsing stored user:', error);
         localStorage.removeItem('user');
       }
-    } else {
-      // Check Firebase auth for active session
-      const unsubscribe = auth.onAuthStateChanged((firebaseUser) => {
-        if (firebaseUser) {
-          const userData: User = {
-            uuid: firebaseUser.uid,
-            username: firebaseUser.displayName || "Unknown",
-            email: firebaseUser.email || "No email",
-            imageUrl: firebaseUser.photoURL || "/default-avatar.png",
-          };
-          setUser(userData);
-          setIsAuthenticated(true);
-          localStorage.setItem('user', JSON.stringify(userData)); // Sync with local storage
-        } else {
-          setUser(null);
-          setIsAuthenticated(false);
-        }
-      });
-
-      return () => unsubscribe();
     }
+
+    const unsubscribe = auth.onAuthStateChanged((firebaseUser) => {
+      if (!firebaseUser) return;
+
+      const userData: User = {
+        uuid: firebaseUser.uid,
+        username: firebaseUser.displayName || "Unknown",
+        email: firebaseUser.email || "No email",
+        imageUrl: firebaseUser.photoURL || "/default-avatar.png",
+      };
+      setUser(userData);
+      setIsAuthenticated(true);
+      localStorage.setItem('user', JSON.stringify(userData));
+    });
+
+    return () => unsubscribe();
   }, []);
 
   // Login method
@@ -82,9 +78,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setIsAuthenticated(true);
       localStorage.setItem('user', JSON.stringify(userData));
 
-      console.log("User logged in and saved.");
     } catch (error) {
       console.error("Error saving user:", error);
+      throw error;
     }
   };
 

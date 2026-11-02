@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button"
 import { Play } from 'lucide-react'
 import { motion, AnimatePresence } from "framer-motion"
 import { useNavigate } from "react-router-dom"
-import { type Movie } from 'types'
+import { type TvShow } from 'types'
 import { useContentFetch } from "@/hooks/useContentFetch"
 import {
   Carousel,
@@ -142,7 +142,7 @@ export default function TvHomePage() {
       <section className="px-8 mb-12 mt-24">
         <h3 className="text-xl font-semibold mb-6">🔥 TRENDING THIS WEEK</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-          {moviesData.map((movie: Movie) => (
+          {moviesData.map((movie: TvShow) => (
             <div
               key={movie.id}
               className="relative group cursor-pointer"
@@ -184,7 +184,7 @@ export default function TvHomePage() {
           className="w-full"
         >
           <CarouselContent className="-ml-4">
-            {moviesData.slice(6).map((movie: Movie) => (
+            {moviesData.slice(6).map((movie: TvShow) => (
               <CarouselItem key={movie.id} className="pl-4 md:basis-1/2 lg:basis-1/6">
                 <div
                   onClick={() => handleMovieClick(movie.id)}
@@ -219,4 +219,3 @@ export default function TvHomePage() {
     </main>
   )
 }
-

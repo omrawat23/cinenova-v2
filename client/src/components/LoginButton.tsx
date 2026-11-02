@@ -35,13 +35,11 @@ export function LoginDialog({
       };
 
       // Use the login method from AuthContext
-      login(userData);
+      await login(userData);
 
       // Close the dialog
       onOpenChange(false);
 
-      // Reload the page to reflect authentication state
-      window.location.reload();
     } catch (err) {
       console.error("Google Sign-In Error:", err);
     } finally {
